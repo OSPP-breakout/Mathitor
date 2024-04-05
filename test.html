@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html>
-  <head>
-	<style>
-  	.editor
-    	{
-   		 	border:solid 1px #ccc;
-   		 	padding: 20px;
-   		 	min-height:200px;
-      	font: sans-serif;
-    	}
-	</style>
-	<title>Det här är ett annat test</title>
-	<link rel="stylesheet" type="text/css" href="mathquill-master/build/mathquill.css" />
-  </head>
+	<head>
+		<style>
+			.editor
+    		{
+				border:solid 1px #ccc;
+				padding: 20px;
+				min-height:200px;
+				font: sans-serif;
+    		}
+		</style>
+		<title>Det här är ett annat test</title>
+		<link rel="stylesheet" type="text/css" href="mathquill-master/build/mathquill.css" />
+  	</head>
 
-  <body>
-	<!-- textruta -->
-	<div class="editor" id="sampleeditor">
-  		<p>Den här rutan dyker upp i mathmode på nåt sätt: <span id="math-field">x^2</span></p>
-	</div>
-	<p>Math mode</p>
-	<p>Översätts till: <code id="latex">x^2</code></p>
+  	<body>
+		<!-- textruta -->
+		<div class="editor" id="sampleeditor">
+  			<p>Den här rutan dyker upp i mathmode på nåt sätt: <span id="math-field">x^2</span></p>
+		</div>
+		<p>Math mode</p>
+		<p>Översätts till: <code id="latex">x^2</code></p>
 
-	<!-- Script för textrutan -->
-	<script>
-  	window.addEventListener('load', function(){
-    	document.getElementById('sampleeditor').setAttribute('contenteditable', 'true');
-    	document.getElementById('sampleeditor2').setAttribute('contenteditable', 'true');
-      	});
+		<!-- Script för textrutan -->
+		<script>
+  			window.addEventListener('load', function() {
+    			document.getElementById('sampleeditor').setAttribute('contenteditable', 'true');
+    			document.getElementById('sampleeditor2').setAttribute('contenteditable', 'true');
+      		});
  
-  	function format(command, value) {
-    	document.execCommand(command, false, value);
-  	}
-	</script>
+  			function format(command, value) {
+    			document.execCommand(command, false, value);
+  			}
+		</script>
 
-	<!-- Script för MathQuillobjekt -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
-	<script src="mathquill-master/build/mathquill.js"></script>
-	<script>
-  	var mathFieldSpan = document.getElementById('math-field');
-  	var latexSpan = document.getElementById('latex');
+		<!-- Script för MathQuillobjekt -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
+		<script src="mathquill-master/build/mathquill.js"></script>
+		<script>
+			var mathFieldSpan = document.getElementById('math-field');
+			var latexSpan = document.getElementById('latex');
 
-  	var MQ = MathQuill.getInterface(2);
+			var MQ = MathQuill.getInterface(2);
 
-  	var mathField = MQ.MathField(mathFieldSpan, {
-    	spaceBehavesLikeTab: true,
-    	handlers: {
-      	edit: function () {
-        	latexSpan.textContent = mathField.latex();
-      	},
-    	},
-  	});
-	</script>
-  </body>
+			var mathField = MQ.MathField(mathFieldSpan, {
+				spaceBehavesLikeTab: true,
+				handlers: {
+					edit: function () {
+						latexSpan.textContent = mathField.latex();
+					},
+				},
+			});
+		</script>
+	</body>
 </html>
