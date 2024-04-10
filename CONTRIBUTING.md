@@ -5,7 +5,7 @@ add context where needed to ensure that anyone can understand what the commented
 
 ## Commit messages
 A commit message should contain a title and if necessary a body. The title and body should be separated by one line. The title should generally
-follow the form `Category: short description`. The following categories are valid: `Setup`, `Feature`, `Bugfix`, `Refactor`, `Documentation`, `Test` or `other`. The category should be based on the main purpose of the commit.
+follow the form `Category: short description`. The following categories are valid: `Setup`, `Feature`, `Bugfix`, `Refactor`, `Documentation`, `Test` or `Other`. The category should be based on the main purpose of the commit.
 
 The body should contain a more in-depth explanation of what has been done and, if necessary, why it has been done.
 
@@ -50,7 +50,6 @@ If the branch is created to fix an issue, write `issue-n` where `n` is the issue
 ### Examples
 * `feature/add-Clang-tidy`
 * `refactor/simplify-conditionals`
-* `document/function-add_two_numbers`
 * `bugfix/memory-leak-after-calling-method-x`
 * `bugfix/issue-42`
 * `other/setup-Meson-build`
