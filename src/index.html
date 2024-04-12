@@ -49,7 +49,8 @@
                     </button>
                 </div>
                 <div class="fourth box">
-                    <button type="button" onclick="text_lower_or_upper(this)">
+                    <!-- <button type="button" onclick="text_lower_or_upper(this)"> -->
+                    <button type="button" onclick="create_MQ_field(2)">
                     aA
                     </button>
                     <button type="button" onclick="text_slash(this)">
@@ -57,15 +58,15 @@
                     </button>
                     <input type="color" onchange="text_color(this)">
                 </div>
+                <div class="fifth box">
+                    <button type="button" onclick="create_MQ_field()">Σ</button>
+                </div>
             </div>
             <br>
             <div class="col">
-                
-                <div class="editor" id="textarea">
-                    hallå<span id="math-field">x^2</span>test
-                </div>
-                <p><code id="latex">x^2</code></p>
-            </div>           
+                <div class="editor" id="textarea" spellcheck="false" contenteditable="true"> </div>
+                <p><code id="latex"></code></p>
+            </div>          
         </div>
     </div>    
 
@@ -75,19 +76,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
     <script src="../mathquill-master/build/mathquill.js"></script>
     <script>
-        var mathFieldSpan = document.getElementById('math-field');
-        var latexSpan = document.getElementById('latex');
-        
         var MQ = MathQuill.getInterface(2);
-        
-        var mathField = MQ.MathField(mathFieldSpan, {
-            spaceBehavesLikeTab: true,
-            handlers: {
-                edit: function () {
-                    latexSpan.textContent = mathField.latex();
-                },
-            },
-        });
+        MQ.config({autoCommands: 'pi theta sum int forall exists', 
+                   spaceBehavesLikeTab: true,
+                   leftRightIntoCmdGoes: 'up',
+                  });
     </script>
 
 </body>

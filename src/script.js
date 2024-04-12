@@ -1,10 +1,7 @@
 const textarea = document.getElementById("textarea");
-
-
-//Detta gör att man kan skriva i textarea-diven 
-window.addEventListener('load', function() {
-    textarea.setAttribute('contenteditable', 'true');
-});
+const latexSpan = document.getElementById('latex');
+var MQ = MathQuill.getInterface(2);
+var amountOfMQFields = 0;
 
 
 function font_size(e) {
@@ -47,4 +44,25 @@ function text_slash(e) {
 function text_color(e) {
     let value = e.value;
     textarea.style.color = value;
+}
+
+function create_MQ_field() {
+    amountOfMQFields++;
+    var newMQField = document.createElement('math-field' + amountOfMQFields.toString());
+    
+    //Insert the new field at caret position
+    var range = window.getSelection().getRangeAt(0);
+    if (range.startContainer.parentNode.id ==='textarea') {
+        range.insertNode(newMQField);
+    }
+
+    //Link the new MQ-field to the latex-preview  
+    var mathField = MQ.MathField(newMQField, {
+        handlers: {
+            edit: function () {
+                latexSpan.textContent = mathField.latex();
+            },
+        },
+    });
+
 }
