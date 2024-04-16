@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maethitor</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="<%= require('./style.css') %>">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="../mathquill-master/build/mathquill.css" />
@@ -22,8 +22,7 @@
                         id="font-size"
                         min="1"
                         max="100"
-                        value="14"
-                        onchange="font_size(this)">
+                        value="14">
 
                 </div>
                 <div class="second box">
@@ -69,9 +68,9 @@
         </div>
     </div>    
 
-    <script src="script.js"></script>
+    <script src="bundle.js"></script>
     
-    <!-- Script för MathQuillobjekt -->
+    <!-- Script för MathQuillobjekt 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
     <script src="../mathquill-master/build/mathquill.js"></script>
     <script>
@@ -80,7 +79,7 @@
                    spaceBehavesLikeTab: true,
                    leftRightIntoCmdGoes: 'up',
                   });
-    </script>
+    </script>-->
 
 </body>
 </html>
