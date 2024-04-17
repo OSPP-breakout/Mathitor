@@ -23,41 +23,40 @@
                         min="1"
                         max="100"
                         value="14">
-
                 </div>
-                <div class="second box">
-                    <button type="button"
-                    onclick="text_bold(this)">
-                    <i class="fa-solid fa-bold"> </i></button>
-                    <button type="button"
-                    onclick="text_italic(this)">
-                    <i class="fa-solid fa-italic"> </i></button>
-                    <button type="button"
-                    onclick="text_underline(this)">
-                    <i class="fa-solid fa-underline"> </i></button>
+                <div class="second box" id="second-box">
+                    <button type="button" id="btn-bold">
+                        <i class="fa-solid fa-bold"> </i>
+                    </button>
+                    <button type="button" id="btn-italic">
+                        <i class="fa-solid fa-italic"> </i>
+                    </button>
+                    <button type="button" id="btn-underline">
+                        <i class="fa-solid fa-underline"> </i>
+                    </button>
                 </div>
                 <div class="third box">
-                    <button type="button" onclick="align_left(this)">
+                    <button type="button" id="btn-align-l">
                         <i class="fa-solid fa-align-left"></i>
                     </button>
-                    <button type="button" onclick="align_center(this)">
+                    <button type="button" id="btn-align-c">
                         <i class="fa-solid fa-align-center"></i>
                     </button>
-                    <button type="button" onclick="align_right(this)">
+                    <button type="button" id="btn-align-r">
                         <i class="fa-solid fa-align-right"></i>
                     </button>
                 </div>
                 <div class="fourth box">
-                    <button type="button" onclick="text_lower_or_upper(this)">
-                    aA
+                    <button type="button" id="lower-upper">aA</button>
+                    <button type="button" id="btn-slash">
+                        <i class="fa-solid fa-text-slash"></i>
                     </button>
-                    <button type="button" onclick="text_slash(this)">
-                    <i class="fa-solid fa-text-slash"></i>
-                    </button>
-                    <input type="color" onchange="text_color(this)">
+                    <input type="color" id="color-picker" value="#ff0000">
                 </div>
                 <div class="fifth box">
-                    <button type="button" onclick="create_MQ_field()">Σ</button>
+                    <button type="button" id="button-MQ">
+                        <i class='fa fa-superscript'></i>
+                    </button>
                 </div>
             </div>
             <br>
@@ -68,18 +67,20 @@
         </div>
     </div>    
 
-    <script src="bundle.js"></script>
-    
-    <!-- Script för MathQuillobjekt 
+    <!-- Script for MathQuill objects -->
+    <!-- These two have to be referenced before bundle.js to avoid ReferenceError -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
     <script src="../mathquill-master/build/mathquill.js"></script>
+    
+    <script src="bundle.js"></script>
+    
     <script>
         var MQ = MathQuill.getInterface(2);
         MQ.config({autoCommands: 'pi theta sum int forall exists', 
                    spaceBehavesLikeTab: true,
                    leftRightIntoCmdGoes: 'up',
                   });
-    </script>-->
+    </script>
 
 </body>
 </html>
