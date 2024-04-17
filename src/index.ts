@@ -74,24 +74,31 @@ export function create_MQ_field(): void {
             edit: function () {
                 latexSpan.textContent = mathField.latex();
             },
-            moveOutOf: function(direction: any, mf: any) {
-                mathField.blur();
-                console.log(mf.el());
-                // mathMode = false;
-                console.log(mf.el().nextSibling);
-                console.log(direction); 
+            moveOutOf: function(direction: any, mathfield: any) {
+                mathMode = false;
+                mathfield.blur();
+                var range = document.createRange();
+                var sel  = document.getSelection();
 
                 if (direction === 1) {
-                    var nextElement = mf.el().nextSibling as HTMLElement;
-                    // nextElement?.
+                    var nextElement = mathfield.el().nextSibling as HTMLElement;
+                    if (nextElement === null) return;
+                    range.setStart(nextElement, 0);
                 } else {
+                    var previousElement = mathfield.el().previousSibling as HTMLElement;
+                    if (previousElement === null) return;
+                    // Need to declare it as a number otherwise it complains that it might be Undef.
+                    range.setStart(previousElement, (previousElement.textContent?.length as number));
                 }
+
+                sel?.removeAllRanges();
+                sel?.addRange(range);
             }
        },
-   });
+   });  
 }
 
-var math_Mode = true;
+
 
 export function handleCursor(e: any) {
     
