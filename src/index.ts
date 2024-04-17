@@ -7,6 +7,12 @@ const latexSpan = document.getElementById('latex') as HTMLElement;
 const MQ = MathQuill.getInterface(2);
 var amountOfMQFields = 0;
 
+// Setup event listeners
+setupEventListeners();
+
+// Variables
+var mathMode = false;
+
 export function font_size(e: any): void {
     let value = e.target.value;
     console.log(value);
@@ -53,6 +59,7 @@ export function text_color(e: any): void {
 export function create_MQ_field(): void {
    amountOfMQFields++;
    var newMQField = document.createElement('math-field' + amountOfMQFields.toString());
+   newMQField.setAttribute("id", 'math-field' + amountOfMQFields.toString());
    
    //Insert the new field at caret position
    var range = (window.getSelection() as Selection).getRangeAt(0);
@@ -68,23 +75,67 @@ export function create_MQ_field(): void {
                 latexSpan.textContent = mathField.latex();
             },
             moveOutOf: function(direction: any, mf: any) {
-                console.log(direction);
+                mathField.blur();
+                console.log(mf.el());
+                // mathMode = false;
+                console.log(mf.el().nextSibling);
+                console.log(direction); 
+
+                if (direction === 1) {
+                    var nextElement = mf.el().nextSibling as HTMLElement;
+                    // nextElement?.
+                } else {
+                }
             }
        },
    });
 }
 
-export function handleCursor(e: any) {
-    var cursorPos = window.getSelection();
-    var prevElem = cursorPos?.focusNode?.previousSibling;
-    var cursorOffset = cursorPos?.anchorOffset;
-    console.log(cursorOffset);
+var math_Mode = true;
 
-    if (prevElem !== null && cursorOffset === 0) {
-        console.log(prevElem?.nodeName);
-        var field = document.getElementById(prevElem?.nodeName as string) as HTMLElement;
-        // field.select()
+export function handleCursor(e: any) {
+    
+    if (!mathMode) {
+        var cursorPos = window.getSelection() as Selection;
+        var cursorOffset = cursorPos?.anchorOffset as number;
+
+        switch (e.key) {
+            case "ArrowLeft":
+                handleLeftArrow(cursorPos, cursorOffset);
+                break;
+            case "ArrowRight":
+                handleRightArrow(cursorPos, cursorOffset);
+                // Right pressed
+                break;
+            case "ArrowUp":
+                // Up pressed
+                break;
+            case "ArrowDown":
+                // Down pressed
+                break;
+            default:
+                return;
+        }
     }
 }
 
-setupEventListeners();
+function handleLeftArrow(cursorPos: Selection, cursorOffset: number) {
+    var prevElem = cursorPos?.focusNode?.previousSibling;
+    if (prevElem !== null && cursorOffset === 0) {
+        mathMode = true;
+        var math_field = MQ(document.getElementById(prevElem?.nodeName.toLowerCase() as string) as HTMLElement);
+        math_field.focus();
+        math_field.moveToRightEnd();
+    }
+}
+
+function handleRightArrow(cursorPos: Selection, cursorOffset: number) {
+    var nextElement = cursorPos?.focusNode?.nextSibling;
+    if (nextElement !== null && cursorOffset === cursorPos?.focusNode?.textContent?.length) {
+        mathMode = true;
+        var math_field = MQ(document.getElementById(nextElement?.nodeName.toLowerCase() as string) as HTMLElement);
+        math_field.focus();
+        math_field.moveToLeftEnd();
+    }
+}
+
