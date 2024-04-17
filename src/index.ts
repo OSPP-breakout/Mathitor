@@ -6,15 +6,16 @@ const MQ = MathQuill.getInterface(2);
 var amountOfMQFields = 0;
 
 //TODO: Extract all addEventListener call, something like this maybe:
-/*
+
 type triggerFunction = (a: any) => any; 
+
 function createEventListener(elementID: string, func: triggerFunction): void {
     document.getElementById(elementID)?.addEventListener("click", function(event) {
         func;
         event.stopImmediatePropagation();
     }, false);
 }
-*/
+
 
 // So then you could just do this for every element
 // createEventListener("button-bold", text_bold);
@@ -147,3 +148,23 @@ function create_MQ_field(): void {
        },
    });
 }
+
+
+// document.getElementById("textarea")?.addEventListener("keyup", function(event) {
+//     // console.log("input event fired");
+//     handleCursor();
+//     event.stopImmediatePropagation();
+// }, false);
+
+// function handleCursor() {
+//     var cursorPos = window.getSelection();
+//     var prevElem = cursorPos?.focusNode?.previousSibling;
+//     var cursorOffset = cursorPos?.anchorOffset;
+//     console.log(cursorOffset);
+
+//     if (prevElem !== null && cursorOffset === 0) {
+//         console.log(prevElem?.nodeName);
+//         var field = document.getElementById(prevElem?.nodeName as string) as HTMLElement;
+//         field.select()
+//     }
+// }
