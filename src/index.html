@@ -1,86 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maethitor</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Maethitor</title>
 
-    <link rel="stylesheet" href="<%= require('./style.css') %>">
+        <link rel="stylesheet" href="<%= require('./style.css') %>" />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="../mathquill-master/build/mathquill.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" type="text/css" href="../mathquill-master/build/mathquill.css" />
+    </head>
 
-</head>
-
-<body>
-    <div class="section">
-        <div class="row">
-            <div class="col">
-            <div class="first box">
-                <input type="number"
-                        id="font-size"
-                        min="1"
-                        max="100"
-                        value="14">
+    <body>
+        <div class="section">
+            <div class="row">
+                <div class="col">
+                    <div class="first box">
+                        <input type="number" id="font-size" min="1" max="100" value="14" />
+                    </div>
+                    <div class="second box" id="second-box">
+                        <button type="button" id="btn-bold">
+                            <i class="fa-solid fa-bold"> </i>
+                        </button>
+                        <button type="button" id="btn-italic">
+                            <i class="fa-solid fa-italic"> </i>
+                        </button>
+                        <button type="button" id="btn-underline">
+                            <i class="fa-solid fa-underline"> </i>
+                        </button>
+                    </div>
+                    <div class="third box">
+                        <button type="button" id="btn-align-l">
+                            <i class="fa-solid fa-align-left"></i>
+                        </button>
+                        <button type="button" id="btn-align-c">
+                            <i class="fa-solid fa-align-center"></i>
+                        </button>
+                        <button type="button" id="btn-align-r">
+                            <i class="fa-solid fa-align-right"></i>
+                        </button>
+                    </div>
+                    <div class="fourth box">
+                        <button type="button" id="lower-upper">aA</button>
+                        <button type="button" id="btn-slash">
+                            <i class="fa-solid fa-text-slash"></i>
+                        </button>
+                        <input type="color" id="color-picker" value="#ff0000" />
+                    </div>
+                    <div class="fifth box">
+                        <button type="button" id="button-MQ">
+                            <i class="fa fa-superscript"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="second box" id="second-box">
-                    <button type="button" id="btn-bold">
-                        <i class="fa-solid fa-bold"> </i>
-                    </button>
-                    <button type="button" id="btn-italic">
-                        <i class="fa-solid fa-italic"> </i>
-                    </button>
-                    <button type="button" id="btn-underline">
-                        <i class="fa-solid fa-underline"> </i>
-                    </button>
-                </div>
-                <div class="third box">
-                    <button type="button" id="btn-align-l">
-                        <i class="fa-solid fa-align-left"></i>
-                    </button>
-                    <button type="button" id="btn-align-c">
-                        <i class="fa-solid fa-align-center"></i>
-                    </button>
-                    <button type="button" id="btn-align-r">
-                        <i class="fa-solid fa-align-right"></i>
-                    </button>
-                </div>
-                <div class="fourth box">
-                    <button type="button" id="lower-upper">aA</button>
-                    <button type="button" id="btn-slash">
-                        <i class="fa-solid fa-text-slash"></i>
-                    </button>
-                    <input type="color" id="color-picker" value="#ff0000">
-                </div>
-                <div class="fifth box">
-                    <button type="button" id="button-MQ">
-                        <i class='fa fa-superscript'></i>
-                    </button>
+                <br />
+                <div class="col">
+                    <div class="editor" id="textarea" spellcheck="false" contenteditable="true"></div>
+                    <p><code id="latex"></code></p>
                 </div>
             </div>
-            <br>
-            <div class="col">
-                <div class="editor" id="textarea" spellcheck="false" contenteditable="true"> </div>
-                <p><code id="latex"></code></p>
-            </div>          
         </div>
-    </div>    
 
-    <!-- Script for MathQuill objects -->
-    <!-- These two have to be referenced before bundle.js to avoid ReferenceError -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
-    <script src="../mathquill-master/build/mathquill.js"></script>
-    
-    <script src="bundle.js"></script>
-    
-    <script>
-        var MQ = MathQuill.getInterface(2);
-        MQ.config({autoCommands: 'pi theta sum int forall exists', 
-                   spaceBehavesLikeTab: true,
-                   leftRightIntoCmdGoes: 'up',
-                  });
-    </script>
+        <!-- Script for MathQuill objects -->
+        <!-- These two have to be referenced before bundle.js to avoid ReferenceError -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
+        <script src="../mathquill-master/build/mathquill.js"></script>
 
-</body>
+        <script src="bundle.js"></script>
+
+        <script>
+            var MQ = MathQuill.getInterface(2)
+            MQ.config({
+                autoCommands: 'pi theta sum int forall exists',
+                spaceBehavesLikeTab: true,
+                leftRightIntoCmdGoes: 'up',
+            })
+        </script>
+    </body>
 </html>
