@@ -43,7 +43,6 @@ export function create_MQ_field(): void {
                     // Need to declare it as a number otherwise it complains that it might be Undef.
                     range.setStart(previousElement, previousElement.textContent?.length as number);
                 }
-
                 sel?.removeAllRanges();
                 sel?.addRange(range);
             },
@@ -78,7 +77,8 @@ export function handleCursor(e: any) {
 
 function handleLeftArrow(cursorPos: Selection, cursorOffset: number) {
     var prevElem = cursorPos?.focusNode?.previousSibling;
-    if (prevElem !== null && cursorOffset === 0) {
+    console.log("prev: "+ prevElem?.nodeName + " " + prevElem?.nodeName.startsWith("MATH-FIELD") );
+    if (prevElem?.nodeName.startsWith("MATH-FIELD") && cursorOffset === 0) {
         mathMode = true;
         var math_field = MQ(document.getElementById(prevElem?.nodeName.toLowerCase() as string) as HTMLElement);
         math_field.focus();
@@ -88,7 +88,9 @@ function handleLeftArrow(cursorPos: Selection, cursorOffset: number) {
 
 function handleRightArrow(cursorPos: Selection, cursorOffset: number) {
     var nextElement = cursorPos?.focusNode?.nextSibling;
-    if (nextElement !== null && cursorOffset === cursorPos?.focusNode?.textContent?.length) {
+    console.log("next: " + nextElement?.nodeName + " " + nextElement?.nodeName.startsWith("MATH-FIELD") );
+    if (nextElement?.nodeName.startsWith("MATH-FIELD") && 
+        cursorOffset === cursorPos?.focusNode?.textContent?.length) {
         mathMode = true;
         var math_field = MQ(document.getElementById(nextElement?.nodeName.toLowerCase() as string) as HTMLElement);
         math_field.focus();
