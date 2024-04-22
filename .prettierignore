@@ -1,1 +1,12 @@
 dist
+.github
+mathquill-master
+.gitignore
+CONTRIBUTING.md
+Makefile
+package-lock.json
+package.json
+README.md
+webpack.config.js
+**/*.html
+**/*.css

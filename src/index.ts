@@ -1,2 +1,3 @@
-console.log('good nom');
-console.log('lol');
+import { add_listeners } from './control/events';
+
+add_listeners();
