@@ -18,8 +18,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'lower-upper', action: 'click', callback: Text_mode.text_lower_or_upper },
     { element_id: 'btn-slash', action: 'click', callback: Text_mode.text_slash },
     { element_id: 'color-picker', action: 'click', callback: Text_mode.text_color },
-    { element_id: 'button-MQ', action: 'click', callback: Math_mode.create_MQ_field },
-    { element_id: 'textarea', action: 'keyup', callback: Math_mode.handleCursor },
+    //{ element_id: 'button-MQ', action: 'click', callback: Math_mode.create_MQ_field },
+    //{ element_id: 'textarea', action: 'keyup', callback: Math_mode.handleCursor },
 ];
 
 export function add_listeners() {
