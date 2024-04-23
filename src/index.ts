@@ -1,3 +1,17 @@
 import { add_listeners } from './control/events';
+const { app, BrowserWindow } = require('electron')
 
-add_listeners();
+
+
+const createWindow = () => {
+    const win = new BrowserWindow({
+      width: 800,
+      height: 600
+    })
+  
+    win.loadFile('src/index.html');
+}
+
+app.whenReady().then(() => {
+    createWindow();
+})

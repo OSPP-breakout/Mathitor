@@ -8,6 +8,7 @@ module.exports = {
     devServer: {
         static: './dist'
     },
+    target: 'electron-main',
     module: {
         rules: [
             {

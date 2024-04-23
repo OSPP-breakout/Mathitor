@@ -2,10 +2,10 @@
   "name": "mathitor",
   "version": "1.0.0",
   "description": "A text editor design for mathematics",
-  "main": "src/index.js",
+  "main": "dist/bundle.js",
   "scripts": {
-    "serve": "webpack serve --open",
     "build": "webpack",
+    "start": "npx electron . --trace-warnings",
     "format": "npx prettier ./src --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
