@@ -2,7 +2,7 @@
   "name": "mathitor",
   "version": "1.0.0",
   "description": "A text editor design for mathematics",
-  "main": "dist/bundle.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "webpack",
     "start": "npx electron . --trace-warnings",
