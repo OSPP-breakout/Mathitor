@@ -1,5 +1,5 @@
-const { app, BrowserWindow } = require('electron')
-
+const electron = require("electron");
+const { app, BrowserWindow } = electron;
 
 const createWindow = () => {
     const window = new BrowserWindow({
@@ -8,7 +8,6 @@ const createWindow = () => {
     })
     
     window.loadFile('dist/index.html');
-    //add_listeners();
 }
 
 app.whenReady().then(() => {
