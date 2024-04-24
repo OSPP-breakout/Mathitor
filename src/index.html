@@ -78,14 +78,14 @@
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
+        
 
         <!-- Script for MathQuill objects -->
-        <!-- These two have to be referenced before bundle.js to avoid ReferenceError -->
+        <!-- These two have to be referenced before bundle.js to avoid ReferenceError  -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
         <script src="../mathquill-master/build/mathquill.js"></script>
-
-        <script src="bundle.js"></script>
-
+        
         <script>
             var MQ = MathQuill.getInterface(2)
             MQ.config({
@@ -94,5 +94,7 @@
                 leftRightIntoCmdGoes: 'up',
             })
         </script>
+
+        <script src="renderer.js"></script>
     </body>
 </html>

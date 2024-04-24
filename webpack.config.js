@@ -4,7 +4,11 @@ const path = require('path');
 module.exports = {
     mode: 'development',
     devtool: 'inline-source-map',
-    entry: './src/index.ts',
+    target: 'electron-main',
+    entry: {
+        index: './src/index.ts',
+        renderer: './src/renderer/renderer.ts'
+    },
     devServer: {
         static: './dist'
     },
@@ -27,7 +31,7 @@ module.exports = {
     },
     output: {
         publicPath: 'auto',
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
         clean: true
     },
