@@ -39,14 +39,13 @@ export function create_MQ_field(): void {
                 mathfield.blur();
                 var range = document.createRange();
                 var sel = document.getSelection();
-
+                var mathFieldNode = mathfield.el() as Node;
                 if (direction === 1) {
-                    var nextElement = mathfield.el().nextSibling as HTMLElement;
-                    console.log(nextElement.hasChildNodes());
+                    var nextElement = findSiblingToParentRight(mathFieldNode) as Node;
                     if (nextElement === null) return;
                     range.setStart(nextElement, 0);
                 } else {
-                    var previousElement = mathfield.el().previousSibling as HTMLElement;
+                    var previousElement = findSiblingToParentLeft(mathFieldNode) as Node;
                     if (previousElement === null) return;
                     // Need to declare it as a number otherwise it complains that it might be Undef.
                     range.setStart(previousElement, previousElement.textContent?.length as number);
@@ -120,12 +119,7 @@ function handleLeftArrow(cursorPos: Selection, cursorOffset: number) {
  * @param cursorOffset - the offset of the cursor in the current position
  */
 function handleRightArrow(cursorPos: Selection, cursorOffset: number) {
-    var nextElement = cursorPos?.focusNode;
-    if (nextElement?.nextSibling === null) {
-        nextElement = findNeighbourNode(nextElement as Node, 1);
-    } else {
-        nextElement = nextElement?.nextSibling as Node;
-    }
+    var nextElement = findNeighbourNode(cursorPos.focusNode as Node, 1);;
     console.log("prev: " + nextElement + " " + isMathField(nextElement as Node));
     
     if (isMathField(nextElement as Node) && 
