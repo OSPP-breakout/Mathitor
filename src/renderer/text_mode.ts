@@ -1,4 +1,4 @@
-const textArea = document.getElementById('textarea') as HTMLElement;
+export const textArea = document.getElementById('textarea') as HTMLElement;
 const fileName = document.getElementById('filename') as HTMLElement;
 
 export function font_size(e: any): void {
