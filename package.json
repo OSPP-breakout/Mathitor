@@ -2,16 +2,17 @@
   "name": "mathitor",
   "version": "1.0.0",
   "description": "A text editor design for mathematics",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "serve": "webpack serve --open",
     "build": "webpack",
+    "start": "electron . --trace-warnings",
     "format": "npx prettier ./src --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "electron": "^30.0.1",
     "html-webpack-plugin": "^5.6.0",
     "jquery": "^3.7.1",
     "prettier": "3.2.5",
