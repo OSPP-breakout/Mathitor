@@ -20,6 +20,7 @@ const listeners: Array<Listener_info> = [
     { element_id: 'color-picker', action: 'click', callback: Text_mode.text_color },
     { element_id: 'button-MQ', action: 'click', callback: Math_mode.create_MQ_field },
     { element_id: 'textarea', action: 'keydown', callback: Math_mode.handleCursor },
+    { element_id: 'textarea', action: 'click', callback: Math_mode.isInsideMathField },
 ];
 
 export function add_listeners() {
