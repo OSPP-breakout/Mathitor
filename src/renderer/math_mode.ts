@@ -1,4 +1,4 @@
-import { textArea } from "./text_mode";
+import { textArea, underline } from "./text_mode";
 
 // Math mode global constants
 let mathMode = false;
@@ -25,6 +25,10 @@ export function create_MQ_field(): void {
     var range = (window.getSelection() as Selection).getRangeAt(0);
     var elem = getCorrectParentElement(range.startContainer);
     if ((elem.parentNode as Element).id === 'textarea') {
+        // range.insert
+        document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'g'}));
+        document.dispatchEvent(new KeyboardEvent('keydown', {'key': ' '}));
+        document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'g'}));
         range.insertNode(newMQField);
     }
 
@@ -46,9 +50,10 @@ export function create_MQ_field(): void {
                     range.setStart(nextElement, 0);
                 } else {
                     var previousElement = findSiblingToParentLeft(mathFieldNode) as Node;
+                    console.log("Previous element: ", previousElement);
                     if (previousElement === null) return;
                     // Need to declare it as a number otherwise it complains that it might be Undef.
-                    range.setStart(previousElement, previousElement.textContent?.length as number);
+                    range.setStart(previousElement, (previousElement.textContent?.length as number));
                 }
                 sel?.removeAllRanges();
                 sel?.addRange(range);
@@ -68,21 +73,19 @@ function getCorrectParentElement(e: any): any {
 export function handleCursor(e: any) {
     if (!mathMode) {
         var cursorPos = window.getSelection() as Selection;
-        var cursorOffset = cursorPos?.anchorOffset as number;
-
+        //var cursorOffset = cursorPos?.anchorOffset as number;
+        //console.log("offset: " + cursorOffset + " FocusNode: " + cursorPos.focusNode?.nodeName);
         switch (e.key) {
             case 'ArrowLeft':
-                handleLeftArrow(cursorPos, cursorOffset);
+                handleRightLeftArrow(cursorPos, -1);
                 break;
             case 'ArrowRight':
-                handleRightArrow(cursorPos, cursorOffset);
-                // Right pressed
+                handleRightLeftArrow(cursorPos, 1);
                 break;
             case 'ArrowUp':
-                // Up pressed
                 break;
             case 'ArrowDown':
-                // Down pressed
+                console.log(cursorPos.focusNode?.nodeName);
                 break;
             default:
                 return;
@@ -90,82 +93,51 @@ export function handleCursor(e: any) {
     }
 }
 
-/**
- * Handles some checks when Left Arrow is pressed.
- * @param cursorPos - position of the cursor
- * @param cursorOffset - the offset of the cursor in the current position
- */
-function handleLeftArrow(cursorPos: Selection, cursorOffset: number) {
-    var prevElem = cursorPos?.focusNode;
-    if (prevElem?.previousSibling === null) {
-        prevElem = findNeighbourNode(prevElem as Node, -1);
-    } else {
-        prevElem = prevElem?.previousSibling as Node;
-    }
-    
-    console.log("prev: " + prevElem + " " + isMathField(prevElem as Node));
-    
-    if (cursorOffset === 0 && isMathField(prevElem as Node)) {
-        mathMode = true;
-        var math_field = MQ(document.getElementById(prevElem?.nodeName.toLowerCase() as string) as HTMLElement);
-        math_field.focus();
-        math_field.moveToRightEnd();
-    }
+function isMathFieldBranch(n: Node | HTMLElement | null): HTMLElement | Node | null {
+    console.log("");
+    console.log("Math-Field branch NODENAME: " + n?.nodeName);
+    console.log("Math-Field branch nodeParent: " + n?.parentNode?.nodeName + " " + (n?.parentNode as Element).id);
+    return n === null
+    ? n 
+    : isMathField(n)
+        ? n
+        : (n.parentNode as Element).id ===  "textarea"
+            ? null
+            : isMathFieldBranch((n.parentNode as Node));
 }
 
+ 
 /**
- * Handles some checks when Right Arrow is pressed.
+ * Handles some checks when right/left Arrow is pressed.
  * @param cursorPos - position of the cursor
- * @param cursorOffset - the offset of the cursor in the current position
+ * @param dir - direction moved in -1 for left and 1 for right
  */
-function handleRightArrow(cursorPos: Selection, cursorOffset: number) {
-    var nextElement = findNeighbourNode(cursorPos.focusNode as Node, 1);;
-    console.log("prev: " + nextElement + " " + isMathField(nextElement as Node));
-    
-    if (isMathField(nextElement as Node) && 
-        cursorOffset === cursorPos?.focusNode?.textContent?.length) {
+function handleRightLeftArrow(cursorPos: Selection, dir: number) {
+    var mathFieldelem = isMathFieldBranch(cursorPos?.focusNode);
+    console.log(mathFieldelem + " " + "Cursor offset: " + cursorPos.anchorOffset);
+    if (mathFieldelem?.nodeName.startsWith("MATH-FIELD") && !mathMode) { 
         mathMode = true;
-        var math_field = MQ(document.getElementById(nextElement?.nodeName.toLowerCase() as string) as HTMLElement);
+        var math_field = MQ(mathFieldelem);
         math_field.focus();
-        math_field.moveToLeftEnd();
-    }
-}
-
-/**
- * Finds the neighbouring mathnode in a given direction if there is one
- * @param n - node to find neighbouring mathnode node of
- * @param dir - direction to find node of [-1 for left, 1 for right]
- * @returns mathField or null
- */
-function findNeighbourNode(n: Node, dir: number): Node | null {
-    var parentSibling: Node | null;
-    if (dir === 1) {
-        parentSibling = findSiblingToParentRight(n)
-        if (parentSibling === null) {
-            return null;
+        if (dir === 1) {
+            math_field.moveToLeftEnd();
         } else {
-            return isMathField(parentSibling) ? parentSibling : findFirstChildRight(parentSibling); 
-        }
-    } else {
-        parentSibling = findSiblingToParentLeft(n)
-        if (parentSibling === null) {
-            return null;
-        } else {
-            return isMathField(parentSibling) ? parentSibling : findFirstChildLeft(parentSibling); 
+            math_field.moveToRightEnd();
         }
     }
 }
+
 
 /**
  * Looks for the first parent (of node n) that has a sibling to the left, and returns that sibling.
  * @param n - The node that we originate from
  * @returns (the first forefather that had a sibling to it's left)'s sibling
- */
+*/
 function findSiblingToParentLeft(n: Node): Node | null {
     return n.previousSibling === null
     ? (n.parentNode as Element).id === "textarea" 
-        ? null
-        : findSiblingToParentLeft(n.parentNode as Node)
+    ? null
+    : findSiblingToParentLeft(n.parentNode as Node)
     : n.previousSibling;
 }
 
@@ -173,12 +145,11 @@ function findSiblingToParentLeft(n: Node): Node | null {
  * Looks for the first parent (of node n) that has a sibling to the right, and returns that sibling.
  * @param n - The node that we originate from
  * @returns (the first forefather that has a sibling to it's right)'s sibling
- */
+*/
 function findSiblingToParentRight(n: Node): null | Node {
-    console.log(n.nextSibling);
     return n.nextSibling === null 
     ? (n.parentNode as Element).id === "textarea"
-        ? null
+    ? null
         : findSiblingToParentRight(n.parentNode as Node)
     : n.nextSibling;
 }
@@ -189,15 +160,15 @@ function findSiblingToParentRight(n: Node): null | Node {
  * parent node
  * @param n - Node to find mathField child of 
  * @returns mathField if there is one else null
- */
+*/
 function findFirstChildLeft(n: Node): Node | null {
     var children = n.childNodes;
     var indexOfLastChild = children.length - 1;
     return children.length === 0
-        ? null
+    ? null
     : isMathField(n.childNodes[indexOfLastChild])
-        ? children[indexOfLastChild]
-        : findFirstChildLeft(n.childNodes[indexOfLastChild]);
+    ? children[indexOfLastChild]
+    : findFirstChildLeft(n.childNodes[indexOfLastChild]);
 }
 
 /**
@@ -206,14 +177,14 @@ function findFirstChildLeft(n: Node): Node | null {
  * parent node
  * @param n - parent node to find mathField child of 
  * @returns mathField if there is one else null
- */
+*/
 function findFirstChildRight(n: Node): Node | null {
     var children = n.childNodes;
     return children.length === 0
-        ? null
+    ? null
     : isMathField(n.childNodes[0])
-        ? children[0]
-        : findFirstChildRight(n.childNodes[0]);
+    ? children[0]
+    : findFirstChildRight(n.childNodes[0]);
 }
 
 /**
@@ -229,3 +200,28 @@ function isMathField(n: Node): boolean {
     }
 }
 
+
+// /**
+//  * Finds the neighbouring mathnode in a given direction if there is one
+//  * @param n - node to find neighbouring mathnode node of
+//  * @param dir - direction to find node of [-1 for left, 1 for right]
+//  * @returns mathField or null
+//  */
+// function findNeighbourNode(n: Node, dir: number): Node | null {
+//     var parentSibling: Node | null;
+//     if (dir === 1) {
+//         parentSibling = findSiblingToParentRight(n)
+//         if (parentSibling === null) {
+//             return null;
+//         } else {
+//             return isMathField(parentSibling) ? parentSibling : findFirstChildRight(parentSibling); 
+//         }
+//     } else {
+//         parentSibling = findSiblingToParentLeft(n)
+//         if (parentSibling === null) {
+//             return null;
+//         } else {
+//             return isMathField(parentSibling) ? parentSibling : findFirstChildLeft(parentSibling); 
+//         }
+//     }
+// }
