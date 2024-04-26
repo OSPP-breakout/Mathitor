@@ -1,5 +1,6 @@
 import * as Math_mode from './math_mode';
 import * as Text_mode from './text_mode';
+import * as File_management from './file_management_frontend';
 
 interface Listener_info {
     element_id: string;
@@ -28,7 +29,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'btn-slash', action: 'click', callback: Text_mode.text_slash },
     { element_id: 'button-MQ', action: 'click', callback: Math_mode.create_MQ_field },
     { element_id: 'textarea', action: 'keyup', callback: Math_mode.handleCursor },
-    { element_id: 'btn-justify-full', action: 'click', callback: Text_mode.justify_full }
+    { element_id: 'btn-justify-full', action: 'click', callback: Text_mode.justify_full },
+    { element_id: 'file-dropdown', action: 'change', callback: File_management.fileManagementOption }
 ];
 
 export function add_listeners() {

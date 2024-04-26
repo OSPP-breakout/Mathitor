@@ -19,12 +19,17 @@
             <div class="toolbar">
                 <div class="head">
                     <input type="text" placeholder="Filename" value="" id="filename">
-                    <select>
+                    <select id="file-dropdown">
                         <option value="" selected="" hidden="" disabled="">File</option>
+                        <!-- <option value="" hidden="" disabled="">File</option> -->
                         <option value="new">New file</option> 
-                        <option value="txt">Save as txt</option>
-                        <option value="pdf">Save as pdf</option>
-                    </select>
+                        <option value="open">Open</option> 
+                        <option value="save">Save</option> 
+                        <option value="saveAs">Save as</option> 
+                        <option value="pdf">Export as PDF</option>
+                        <!-- <option value="txt">Save as txt</option>
+                        <option value="pdf">Save as pdf</option> -->
+                        </select>
                     <select id="selector-heading" this.selectedIndex=0;">
                         <option value="" selected="" hidden="" disabled="">Format</option>
                         <option value="h1">Heading 1</option>
