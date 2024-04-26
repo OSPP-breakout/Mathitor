@@ -17,16 +17,22 @@ export function create_MQ_field(): void {
         return;
     }
 
+    var newSpan = document.createElement('mathSpan');
+
     amountOfMQFields++;
     var newMQField = document.createElement('math-field' + amountOfMQFields.toString());
     newMQField.setAttribute('id', 'math-field' + amountOfMQFields.toString());
 
     //Insert the new field at caret position
     var range = (window.getSelection() as Selection).getRangeAt(0);
-    var elem = getCorrectParentElement(range.startContainer);
-    if ((elem.parentNode as Element).id === 'textarea') {
-        // range.insertNode(document.createTextNode("  "));
-        range.insertNode(newMQField);
+    var elem;
+    if((elem = getCorrectParentElement(range.startContainer)) === null) {elem = range.commonAncestorContainer}
+    // var rawSpace = document.createTextNode(" ");
+    if (elem.id === 'textarea' || (elem.parentNode as Element).id === 'textarea') {
+        range.insertNode(newSpan);
+        newSpan.appendChild(document.createTextNode(" "));
+        newSpan.appendChild(newMQField);
+        newSpan.appendChild(document.createTextNode(" "));
     }
 
     //Link the new MQ-field to the latex-preview
@@ -45,19 +51,25 @@ export function create_MQ_field(): void {
                     var nextParentElement = findSiblingToParentRight(mathFieldNode) as Node;
                     var nextElement = findFirstChildLeft(nextParentElement);
                     if (nextElement === null) return;
-                    range.setStart(nextElement, 0);
+                    var len = nextElement.textContent?.length === 0 ? 0 : 1;
+                    range.setStart(nextElement, len);
                 } else {
                     var previousParentElement = findSiblingToParentLeft(mathFieldNode) as Node;
                     var previousElement = findFirstChildRight(previousParentElement);
                     if (previousElement === null) return;
                     // Need to declare it as a number otherwise it complains that it might be Undef.
-                    range.setStart(previousElement, (previousElement.textContent?.length as number));
+                    var len = (previousElement.textContent?.length as number) - 1 >= 0 ? 
+                             (previousElement.textContent?.length as number) - 1 :
+                             (previousElement.textContent?.length as number);
+                    range.setStart(previousElement, len);
                 }
                 sel?.removeAllRanges();
                 sel?.addRange(range);
             },
         },
     });
+    window.getSelection()?.removeAllRanges();
+    mathField.focus();
 }
 
 function getCorrectParentElement(e: any): any {
@@ -103,6 +115,19 @@ function isMathFieldBranch(n: Node | HTMLElement | null): HTMLElement | Node | n
             : (n.parentNode as Element).id ===  "textarea"
                 ? null
                 : isMathFieldBranch((n.parentNode as Node));
+}
+
+function isMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | null {
+    console.log("Current node: " + n?.nodeName);
+    return n === null
+    ? n 
+    : (n as Element).id === "textarea"
+        ? null
+        : n.nodeName.startsWith("MATHSPAN")
+            ? n
+            : (n.parentNode as Element).id ===  "textarea"
+                ? null
+                : isMathSpan((n.parentNode as Node));
 }
 
  
@@ -182,12 +207,14 @@ function findChildMathFieldRight(n: Node): Node | null {
         return null;
     }
     var index = n.childNodes.length - 1;
-    
+    console.log("Current Node:" + n.nodeName); //TODO Remove
     return isMathField(n)
-        ? n
+    ? n
+    : n.nodeName.startsWith("MATHSPAN")
+        ? n.childNodes[1]
         // case where sometimes there's an empty textfield placed to the right wich made it crasch
-        : n.childNodes[index].nodeName === "#text" && n.childNodes[index].textContent?.length === 0
-            ? findChildMathFieldRight(n.childNodes[index - 1])
+        // : n.childNodes[index].nodeName === "#text" && n.childNodes[index].textContent?.length === 0
+        //     ? findChildMathFieldRight(n.childNodes[index - 1])
             : findChildMathFieldRight(n.childNodes[index]);
 }
 
@@ -197,7 +224,9 @@ function findChildMathFieldLeft(n: Node): Node | null {
     ? null
     : isMathField(n)
         ? n
-        : findChildMathFieldLeft(n.childNodes[index])
+        : n.nodeName.startsWith("MATHSPAN")
+            ? n.childNodes[1]
+            : findChildMathFieldLeft(n.childNodes[index])
 }
 
 
@@ -264,9 +293,10 @@ export function isInsideMathField() {
         return;
     }
     var focusedNode = sel.focusNode;
-    var m = isMathFieldBranch(focusedNode as Node);
-    if (isMathField(m as Node)) {
+    var m = isMathSpan(focusedNode as Node);
+    if (m?.nodeName.startsWith("MATHSPAN")) {
         mathMode = true;
+        MQ(m.childNodes[1]).focus();
     } else {
         mathMode = false;
     }
