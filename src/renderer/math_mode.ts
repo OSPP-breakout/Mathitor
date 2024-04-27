@@ -6,6 +6,7 @@ let mathMode = false;
 declare var MathQuill: any;
 const MQ = MathQuill.getInterface(2);
 let amountOfMQFields = 0;
+let mathPlacement = 1;
 
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
@@ -30,9 +31,13 @@ export function create_MQ_field(): void {
     // var rawSpace = document.createTextNode(" ");
     if (elem.id === 'textarea' || (elem.parentNode as Element).id === 'textarea') {
         range.insertNode(newSpan);
-        newSpan.appendChild(document.createTextNode(" "));
+        let span;
+        newSpan.appendChild(span = document.createElement("span"));
+        span.textContent = " ";
+        span.style.userSelect = "none";
         newSpan.appendChild(newMQField);
-        newSpan.appendChild(document.createTextNode(" "));
+        newSpan.appendChild(span = document.createElement("span"));
+        span.style.marginRight = "5px";
     }
 
     //Link the new MQ-field to the latex-preview
@@ -48,23 +53,37 @@ export function create_MQ_field(): void {
                 var sel = document.getSelection();
                 var mathFieldNode = mathfield.el() as Node;
                 if (direction === 1) {
-                    var nextParentElement = findSiblingToParentRight(mathFieldNode) as Node;
+                    var nextParentElement = findSiblingToParentRight(mathFieldNode.parentNode as Node) as Node;
                     var nextElement = findFirstChildLeft(nextParentElement);
                     if (nextElement === null) return;
                     var len = nextElement.textContent?.length === 0 ? 0 : 1;
-                    range.setStart(nextElement, len);
+                    range.setStart(nextElement, 0);
                 } else {
-                    var previousParentElement = findSiblingToParentLeft(mathFieldNode) as Node;
+                    var previousParentElement = findSiblingToParentLeft(mathFieldNode.parentNode as Node) as Node;
                     var previousElement = findFirstChildRight(previousParentElement);
                     if (previousElement === null) return;
                     // Need to declare it as a number otherwise it complains that it might be Undef.
                     var len = (previousElement.textContent?.length as number) - 1 >= 0 ? 
                              (previousElement.textContent?.length as number) - 1 :
                              (previousElement.textContent?.length as number);
-                    range.setStart(previousElement, len);
+                    range.setStart(previousElement, len + 1);
                 }
                 sel?.removeAllRanges();
                 sel?.addRange(range);
+            },
+            deleteOutOf: function(dir: number, mathfield: any) {
+                mathMode = false;
+                mathfield.blur();
+                var range = document.createRange();
+                var caretPos = document.getSelection();
+                var mathFieldNode = mathfield.el() as Node;
+                if (dir === -1) {
+                    deleteOutLeft(range, mathFieldNode);
+                } else {
+                    deleteOutRight(range, mathFieldNode);
+                }
+                caretPos?.removeAllRanges();
+                caretPos?.addRange(range);
             },
         },
     });
@@ -82,24 +101,28 @@ function getCorrectParentElement(e: any): any {
 
 export function handleCursor(e: any) {
     if (!mathMode) {
-        var cursorPos = window.getSelection() as Selection;
+        var caretPos = window.getSelection() as Selection;
         //var cursorOffset = cursorPos?.anchorOffset as number;
         //console.log("offset: " + cursorOffset + " FocusNode: " + cursorPos.focusNode?.nodeName);
         switch (e.key) {
             case 'ArrowLeft':
-                handleLeftArrow(cursorPos);
+                handleLeftArrow(caretPos);
                 break;
             case 'ArrowRight':
-                //handleRightLeftArrow(cursorPos, 1);
-                handleRightArrow(cursorPos);
+                handleRightArrow(caretPos);
                 break;
             case 'ArrowUp':
                 break;
             case 'ArrowDown':
                 break;
-            case "Escape":
-                console.log("pressed");
+            case "Backspace":
+                handleBackSpace(caretPos);
+                break;
+            case "Delete":
+                handleDelete(caretPos);
+                break;
             default:
+                //console.log(e.key)
                 return;
         }
     }
@@ -117,8 +140,7 @@ function isMathFieldBranch(n: Node | HTMLElement | null): HTMLElement | Node | n
                 : isMathFieldBranch((n.parentNode as Node));
 }
 
-function isMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | null {
-    console.log("Current node: " + n?.nodeName);
+function getMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | null {
     return n === null
     ? n 
     : (n as Element).id === "textarea"
@@ -127,27 +149,13 @@ function isMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | null {
             ? n
             : (n.parentNode as Element).id ===  "textarea"
                 ? null
-                : isMathSpan((n.parentNode as Node));
+                : getMathSpan((n.parentNode as Node));
 }
 
- 
-/**
- * Handles some checks when right/left Arrow is pressed.
- * @param cursorPos - position of the cursor
- * @param dir - direction moved in -1 for left and 1 for right
- */
-function handleRightLeftArrow(cursorPos: Selection, dir: number) {
-    var mathFieldelem = isMathFieldBranch(cursorPos?.focusNode);
-    if (mathFieldelem?.nodeName.startsWith("MATH-FIELD") && !mathMode) { 
-        mathMode = true;
-        var math_field = MQ(mathFieldelem);
-        math_field.focus();
-        if (dir === 1) {
-            math_field.moveToLeftEnd();
-        } else {
-            math_field.moveToRightEnd();
-        }
-    }
+function isMathSpan(n: Node | HTMLElement | null): boolean {
+    return n === null 
+    ? false
+    : n.nodeName.startsWith("MATHSPAN");
 }
 
 function handleLeftArrow(caretPos: Selection) {
@@ -155,26 +163,31 @@ function handleLeftArrow(caretPos: Selection) {
     var prevSibling = findSiblingToParentLeft(caretPos.focusNode as Node);
     var mathFieldElem = findChildMathFieldRight(prevSibling as Node);
     var nodeLengthToMathField = 1;
-    if (!mathMode && isMathField(mathFieldElem as Node) && caretOffset === nodeLengthToMathField) {
+    console.log("Previous element: " + prevSibling?.nodeName + " Caret Pos: " + caretOffset + " Caret at: " + caretPos.focusNode?.textContent);
+    if (!mathMode && ((isMathField(prevSibling as Node) && caretOffset === nodeLengthToMathField)
+                     || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
         mathMode = true;
-        var math_field = MQ(mathFieldElem);
-        math_field.focus();
-        math_field.moveToRightEnd();
+        var mathField = MQ(mathFieldElem);
+        mathField.focus();
+        mathField.moveToRightEnd();
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node))
     {
         mathMode = true;
-        var math_field = MQ(mathFieldElem);
-        math_field.focus();
-        math_field.moveToRightEnd();
+        var mathField = MQ(mathFieldElem);
+        mathField.focus();
+        mathField.moveToRightEnd();
     }
 }
 
 function handleRightArrow(caretPos: Selection) {
     var caretOffset = caretPos.anchorOffset;
-    var prevSibling = findSiblingToParentRight(caretPos.focusNode as Node);
-    var mathFieldElem = findChildMathFieldLeft(prevSibling as Node);
-    var nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number) - 1;
-    if (!mathMode && isMathField(mathFieldElem as Node) && caretOffset === nodeLengthToMathField) {
+    var nextSibling = findSiblingToParentRight(caretPos.focusNode as Node);
+    var mathFieldElem = findChildMathFieldLeft(nextSibling as Node);
+    var nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number);
+    console.log("Next element: " + nextSibling?.nodeName + " Caret Pos: " + caretOffset + " Caret at: " + caretPos.focusNode?.textContent);
+    console.log("Next child elem: " + mathFieldElem?.nodeName);
+    console.log("");
+    if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
         mathMode = true;
         var math_field = MQ(mathFieldElem);
         math_field.focus();
@@ -186,6 +199,82 @@ function handleRightArrow(caretPos: Selection) {
         math_field.focus();
         math_field.moveToLeftEnd();
     }
+}
+
+function handleBackSpace(caretPos: Selection) {
+    var caretOffset = caretPos.anchorOffset;
+    var prevSibling = findSiblingToParentLeft(caretPos.focusNode as Node);
+    var mathFieldElem = findChildMathFieldRight(prevSibling as Node);
+    var nodeLengthToMathField = 1;
+    console.log("Previous element: " + prevSibling?.nodeName + " Caret Pos: " + caretOffset);
+    if (!mathMode && ((isMathField(prevSibling as Node) && caretOffset === nodeLengthToMathField)
+        || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
+        mathMode = true;
+        var mathField = MQ(mathFieldElem);
+        mathField.focus();
+        mathField.moveToRightEnd();
+    } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
+        mathMode = true;
+        var mathField = MQ(mathFieldElem);
+        mathField.focus();
+        mathField.moveToRightEnd();
+    }
+}
+
+function handleDelete(caretPos: Selection) {
+    var caretOffset = caretPos.anchorOffset;
+    var nextSibling = findSiblingToParentRight(caretPos.focusNode as Node);
+    var mathFieldElem = findChildMathFieldLeft(nextSibling as Node);
+    var nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number);
+    // console.log("Next element: " + nextSibling?.nodeName + " Caret Pos: " + caretOffset + " Caret at: " + caretPos.focusNode?.textContent);
+    if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
+        mathMode = true;
+        var math_field = MQ(mathFieldElem);
+        math_field.focus();
+        math_field.moveToLeftEnd();
+    } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node))
+    {
+        mathMode = true;
+        var math_field = MQ(mathFieldElem);
+        math_field.focus();
+        math_field.moveToLeftEnd();
+    }
+}
+
+function deleteOutLeft(range: Range, mathFieldNode: Node): void {
+    var previousParentElement = findSiblingToParentLeft(mathFieldNode?.parentNode as Node) as Node;
+    var previousElement = findFirstChildRight(previousParentElement);
+    
+    if (previousElement === null) {
+
+    } else {
+        var len = (previousElement.textContent?.length as number);
+        if (MQ(mathFieldNode).latex() === "") {
+            removeMathField(mathFieldNode)
+        }
+        range.setStart(previousElement, len);
+    }
+    
+}
+
+function deleteOutRight(range: Range, mathFieldNode: Node): void {
+    var NextParentElement = findSiblingToParentRight(mathFieldNode?.parentNode as Node) as Node;
+    var nextElement = findFirstChildLeft(NextParentElement);
+    if (nextElement === null) {
+
+    } else {
+        var len = 0;
+        if (MQ(mathFieldNode).latex() === "") {
+            removeMathField(mathFieldNode)
+        }
+        range.setStart(nextElement, len);
+    }
+}
+
+function removeMathField(mathFieldNode: Node): void {
+    const mathSpan = mathFieldNode.parentElement;
+    const foreFather = mathSpan?.parentElement;
+    foreFather?.removeChild(mathSpan as HTMLElement);
 }
 
 
@@ -207,11 +296,10 @@ function findChildMathFieldRight(n: Node): Node | null {
         return null;
     }
     var index = n.childNodes.length - 1;
-    console.log("Current Node:" + n.nodeName); //TODO Remove
     return isMathField(n)
     ? n
     : n.nodeName.startsWith("MATHSPAN")
-        ? n.childNodes[1]
+        ? n.childNodes[mathPlacement]
         // case where sometimes there's an empty textfield placed to the right wich made it crasch
         // : n.childNodes[index].nodeName === "#text" && n.childNodes[index].textContent?.length === 0
         //     ? findChildMathFieldRight(n.childNodes[index - 1])
@@ -225,7 +313,7 @@ function findChildMathFieldLeft(n: Node): Node | null {
     : isMathField(n)
         ? n
         : n.nodeName.startsWith("MATHSPAN")
-            ? n.childNodes[1]
+            ? n.childNodes[mathPlacement]
             : findChildMathFieldLeft(n.childNodes[index])
 }
 
@@ -293,7 +381,7 @@ export function isInsideMathField() {
         return;
     }
     var focusedNode = sel.focusNode;
-    var m = isMathSpan(focusedNode as Node);
+    var m = getMathSpan(focusedNode as Node);
     if (m?.nodeName.startsWith("MATHSPAN")) {
         mathMode = true;
         MQ(m.childNodes[1]).focus();
