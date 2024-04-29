@@ -5,21 +5,41 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "webpack",
-    "start": "electron . --trace-warnings",
+    "start": "electron-forge start",
     "format": "npx prettier ./src --write",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "test": "wdio run ./wdio.conf.ts"
   },
-  "author": "",
+  "author": "derpy",
   "license": "ISC",
   "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "@wdio/cli": "^8.36.1",
+    "@wdio/local-runner": "^8.36.1",
+    "@wdio/mocha-framework": "^8.36.1",
+    "@wdio/spec-reporter": "^8.36.1",
     "electron": "^30.0.1",
     "html-webpack-plugin": "^5.6.0",
     "jquery": "^3.7.1",
     "prettier": "3.2.5",
     "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
+    "wdio-electron-service": "^6.4.1",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
   }
 }
