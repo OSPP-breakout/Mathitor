@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 const textArea = document.getElementById('textarea') as HTMLElement;
 const fileName = document.getElementById('filename') as HTMLElement;
 const fileDropdown = document.getElementById("file-dropdown") as HTMLSelectElement;
@@ -21,7 +23,10 @@ export function fileManagementOption(): void {
 
 function saveFileAs(): void {
     let toSave: string = textArea.outerHTML;
+    
     console.log("toSave:\n\n" + toSave);
+
+    ipcRenderer.send('save-file-as', { data: toSave });
 
     // TODO: Send toSave to main process, which in turn saves it as a txt file.
     // Along with toSave, also send a flag indicating that we want to 'save as' not 'save'
