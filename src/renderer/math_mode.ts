@@ -1,4 +1,7 @@
 // Math mode global constants
+const shortCommands: string = require("./autoCommands.txt").replace(/[\n\r]+/g, " ");
+const shortOperators: string = require("./autoOperators.txt").replace(/[\n\r]+/g, " ");
+
 let mathMode = false;
 
 declare var MathQuill: any;
@@ -47,6 +50,8 @@ export function create_MQ_field(): void {
                 sel?.addRange(range);
             },
         },
+        autoCommands: shortCommands,
+        autoOperatorNames: shortOperators
     });
 }
 
