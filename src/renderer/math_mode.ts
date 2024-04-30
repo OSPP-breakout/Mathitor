@@ -49,9 +49,15 @@ export function create_MQ_field(): void {
                 sel?.removeAllRanges();
                 sel?.addRange(range);
             },
+            enter: function(mathField: any) {
+                mathField.config({autoCommands : shortCommands});
+                const character = latexSpan.textContent?.charAt(latexSpan.textContent.length - 1);
+                mathField.keystroke("Backspace");
+                console.log(character);
+                character?.valueOf
+                mathField.keystroke(character?.toUpperCase);
+            }, 
         },
-        autoCommands: shortCommands,
-        autoOperatorNames: shortOperators
     });
 }
 

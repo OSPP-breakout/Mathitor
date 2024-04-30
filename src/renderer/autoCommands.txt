@@ -1,3 +1,35 @@
-alpha beta chi delta epsilon eta gamma iota kappa lambda mu nu
-omega phi pi psi rho sigma tau theta upsilon xi zeta digamma Delta Gamma Omega Phi Pi Psi
-Sigma Theta Upsilon Xi sum int prod
+alpha
+beta
+gamma Gamma
+delta Delta
+epsilon
+zeta
+eta Eta
+theta Theta
+iota Iota
+kappa Kappa
+lambda Lambda
+mu Mu
+Psi
+xi Xi
+pi Pi
+rho Rho
+sigma Sigma
+tau Tau
+phi Phi
+chi Chi
+omega Omega
+summation
+integral
+product
+coproduct
+naturals
+integers
+bar
+binomial
+plusminus
+minusplus
+isin
+contains
+cases
+matrix
