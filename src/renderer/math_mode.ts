@@ -1,6 +1,9 @@
 import { textArea, underline } from "./text_mode";
 
 // Math mode global constants
+const shortCommands: string = require("./autoCommands.txt").replace(/[\n\r]+/g, " ");
+const shortOperators: string = require("./autoOperators.txt").replace(/[\n\r]+/g, " ");
+
 let mathMode = false;
 
 declare var MathQuill: any;
@@ -92,6 +95,8 @@ export function create_MQ_field(): void {
                 caretPos?.addRange(range);
             },
         },
+        autoCommands: shortCommands,
+        autoOperatorNames: shortOperators
     });
     window.getSelection()?.removeAllRanges();
     mathField.focus();
