@@ -7,8 +7,13 @@ declare let MathQuill: any;
 const MQ = MathQuill.getInterface(2);
 let amountOfMQFields = 0;
 let mathPlacement = 1;
-const LEFT = -1;
-const RIGHT = 1;
+
+enum Direction {
+    Up,
+    Down,
+    Left = -1,
+    Right = 1,
+}
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
 // Math mode functions
@@ -70,7 +75,7 @@ export function create_MQ_field(): void {
                 let range = document.createRange();
                 const caretPos = document.getSelection();
                 const mathFieldNode = mathfield.el() as Node;
-                if (dir === LEFT) {
+                if (dir === Direction.Left) {
                     deleteOutLeft(range, mathFieldNode);
                 } else {
                     deleteOutRight(range, mathFieldNode);
@@ -158,9 +163,9 @@ function handleLeftArrow(caretPos: Selection) {
     const nodeLengthToMathField = 1;
     if (!mathMode && ((isMathField(prevSibling as Node) && caretOffset === nodeLengthToMathField)
                      || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
-        activateMathField(prevSibling as Node, LEFT);
+        activateMathField(prevSibling as Node, Direction.Left);
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
-        activateMathField(prevSibling as Node, LEFT);
+        activateMathField(prevSibling as Node, Direction.Left);
     }
 }
 
@@ -173,9 +178,9 @@ function handleRightArrow(caretPos: Selection) {
     console.log("Next child elem: " + mathFieldElem?.nodeName);
     console.log("");
     if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
-        activateMathField(nextSibling as Node, RIGHT);
+        activateMathField(nextSibling as Node, Direction.Right);
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
-        activateMathField(nextSibling as Node, RIGHT);
+        activateMathField(nextSibling as Node, Direction.Right);
     }
 }
 
@@ -185,11 +190,11 @@ function handleBackSpace(caretPos: Selection) {
     const nodeLengthToMathField = 1;
     if (!mathMode && ((isMathField(prevSibling as Node) && caretOffset === nodeLengthToMathField)
         || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
-        activateMathField(prevSibling as Node, LEFT);
+        activateMathField(prevSibling as Node, Direction.Left);
     } else if (!mathMode && caretOffset === 1 && caretPos.focusNode?.textContent?.length === 1) {
         console.log("Prev sibling: " + prevSibling?.nodeName)
         caretPos.focusNode.textContent = "\u00A0";  
-        activateMathField(prevSibling as Node, LEFT);
+        activateMathField(prevSibling as Node, Direction.Left);
     }
 }
 
@@ -199,12 +204,12 @@ function handleDelete(caretPos: Selection) {
     let mathFieldElem = findChildMathFieldLeft(nextSibling as Node);
     const nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number);
     if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
-        activateMathField(nextSibling as Node, RIGHT);
+        activateMathField(nextSibling as Node, Direction.Right);
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
-        activateMathField(nextSibling as Node, RIGHT);
+        activateMathField(nextSibling as Node, Direction.Right);
     } else if (!mathMode && caretOffset === 0 && caretPos.focusNode?.textContent?.length === 1) {
         caretPos.focusNode.textContent = "\u00A0";
-        activateMathField(nextSibling as Node, RIGHT);
+        activateMathField(nextSibling as Node, Direction.Right);
     }
 }
 
@@ -283,10 +288,10 @@ function activateMathField(sibling: Node, dir: number): void {
     }
     
     mathMode = true;
-    const mathFieldElem = dir === LEFT ? findChildMathFieldRight(sibling) : findChildMathFieldLeft(sibling);
+    const mathFieldElem = dir === Direction.Left ? findChildMathFieldRight(sibling) : findChildMathFieldLeft(sibling);
     const mathField = fixAndGetMathField(mathFieldElem as Node);
     mathField.focus();
-    if (dir == LEFT) mathField.moveToRightEnd();
+    if (dir == Direction.Left) mathField.moveToRightEnd();
     else mathField.moveToLeftEnd();
 }
 
