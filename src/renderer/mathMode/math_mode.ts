@@ -9,6 +9,7 @@ export let mathMode = false;
 let amountOfMQFields = 0;
 let mathFieldArray: Array<any> = [];
 
+
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
 // Math mode functions
@@ -18,7 +19,8 @@ export function createMathField(): void {
     amountOfMQFields++;
     const MQField = document.createElement('math-field' + amountOfMQFields.toString());
     MQField.setAttribute('id', 'math-field' + amountOfMQFields.toString());
-    insertMathField(MQField);
+    const mathFieldSpan = document.createElement('mathSpan');
+    insertMathField(MQField, mathFieldSpan);
 
     // Link the new MQ-field to the latex-preview
     var mathField = MQ.MathField(MQField, {
@@ -57,6 +59,8 @@ export function createMathField(): void {
             },
         },
     });
+    const mathSpanObserver = new MutationObserver(fixMathSpan);
+    mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
     window.getSelection()?.removeAllRanges();
     mathField.focus();
@@ -73,10 +77,8 @@ function getCorrectParentElement(e: any): any {
 /**
  * Insert `mathField` at the current caret position. 
  */
-function insertMathField(mathField: HTMLElement) {
-    const mathFieldSpan = document.createElement('mathSpan');
+function insertMathField(mathField: HTMLElement, mathFieldSpan: HTMLElement) {
     const range = (window.getSelection() as Selection).getRangeAt(0);
-
     let element;
     if((element = getCorrectParentElement(range.startContainer)) === null) {element = range.commonAncestorContainer}
     if (element.id === 'textarea' || (element.parentNode as Element).id === 'textarea') {
@@ -108,8 +110,6 @@ function fixAndGetMathField(mathFieldElem: Node): any {
         let childNode = mathFieldElem.childNodes[0];
         while (!(childNode.childNodes[0].nodeName.startsWith("SPAN"))) {
             childNode = childNode.childNodes[0];
-            console.log(childNode.nodeName.startsWith("SPAN"));
-            console.log(childNode.nodeName);
         }
         const leftChild = childNode.childNodes[0];
         const rightChild = childNode.childNodes[1];
@@ -126,8 +126,6 @@ export function correctAllMathFields() {
             let childNode = mathFieldElem.childNodes[0];
             while (!(childNode.childNodes[0].nodeName.startsWith("SPAN"))) {
                 childNode = childNode.childNodes[0];
-                console.log(childNode.nodeName.startsWith("SPAN"));
-                console.log(childNode.nodeName);
             }
             const leftChild = childNode.childNodes[0];
             const rightChild = childNode.childNodes[1];
@@ -152,4 +150,22 @@ export function isInsideMathField() {
     } else {
         mathMode = false;
     }
+}
+
+function fixMathSpan(record: any, observer: any) {
+    const removedNodes = record.removedNodes;
+    removedNodes.forEach(element as any=> {
+        if (element.nodeName.startsWith("SPAN")) {
+            const span = document.createElement("span");
+            span.textContent = "\u00A0";
+            span.style.userSelect = "none";
+            span.contentEditable = "false";
+            if (element.previousSibling === null) {
+                element.parentElement?.prepend(span)
+            } else {
+                element.parentElement?.appendChild(span);
+            }
+        }
+    });
+    return;
 }

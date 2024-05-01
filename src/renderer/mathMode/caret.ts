@@ -13,8 +13,6 @@ const MQ = MathQuill.getInterface(2);
 export function handleCursor(e: any) {
     if (!mathMode) {
         var caretPos = window.getSelection() as Selection;
-        //var cursorOffset = cursorPos?.anchorOffset as number;
-        //console.log("offset: " + cursorOffset + " FocusNode: " + cursorPos.focusNode?.nodeName);
         switch (e.key) {
             case 'ArrowLeft':
                 handleLeftArrow(caretPos);
@@ -41,22 +39,31 @@ export function handleCursor(e: any) {
 
 export function arrowOutRight(range: Range, mathFieldNode: Node) {
     const nextParentElement = findSiblingToParentRight(mathFieldNode.parentNode as Node) as Node;
-    const nextElement = findFirstChildLeft(nextParentElement);
-    if (nextElement === null) return;
+    let nextElement: Node;
+    if (nextParentElement === null) nextElement = putElementOutside(mathFieldNode, Direction.Right);
+    else nextElement = findFirstChildLeft(nextParentElement) as Node;
     range.setStart(nextElement, 0);
     range.setEnd(nextElement, 0);
 }
 
 export function arrowOutLeft(range: Range, mathFieldNode: Node) {
     const previousParentElement = findSiblingToParentLeft(mathFieldNode.parentNode as Node) as Node;
-    const previousElement = findFirstChildRight(previousParentElement);
-    if (previousElement === null) return;
+    let previousElement: Node;
+    if (previousParentElement === null) previousElement = putElementOutside(mathFieldNode, Direction.Left);
+    else previousElement = findFirstChildRight(previousParentElement) as Node;
     // Need to declare it as a number otherwise it complains that it might be Undef.
     const len = (previousElement.textContent?.length as number) - 1 >= 0 ? 
                 (previousElement.textContent?.length as number) - 1 :
                 (previousElement.textContent?.length as number);
     range.setStart(previousElement, len + 1);
     range.setEnd(previousElement, len + 1);
+}
+
+function putElementOutside(mathFieldNode: Node, dir: number): Node {
+    const newElem = document.createTextNode("");
+    if (dir == Direction.Right) mathFieldNode.parentElement?.parentElement?.append(newElem);
+    else mathFieldNode.parentElement?.parentElement?.prepend(newElem);
+    return newElem;
 }
 
 export function deleteOutLeft(range: Range, mathFieldNode: Node): void {
