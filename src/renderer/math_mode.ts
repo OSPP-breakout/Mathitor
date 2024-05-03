@@ -1,3 +1,5 @@
+import { autoComplete } from "./autocomplete";
+
 // Math mode global constants
 const shortCommands: string = require("./autoCommands.txt").replace(/[\n\r]+/g, " ");
 const shortOperators: string = require("./autoOperators.txt").replace(/[\n\r]+/g, " ");
@@ -29,6 +31,7 @@ export function create_MQ_field(): void {
         handlers: {
             edit: function () {
                 latexSpan.textContent = mathField.latex();
+                autoComplete(mathField);
             },
             moveOutOf: function (direction: any, mathfield: any) {
                 mathMode = false;
@@ -50,7 +53,6 @@ export function create_MQ_field(): void {
                 sel?.addRange(range);
             },
             enter: function(mathField: any) {
-                mathField.config({autoCommands : shortCommands});
                 const character = latexSpan.textContent?.charAt(latexSpan.textContent.length - 1);
                 mathField.keystroke("Backspace");
                 console.log(character);
@@ -58,6 +60,8 @@ export function create_MQ_field(): void {
                 mathField.keystroke(character?.toUpperCase);
             }, 
         },
+        autoCommands: shortCommands,
+        autoOperatorNames: shortOperators
     });
 }
 
