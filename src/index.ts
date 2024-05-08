@@ -11,7 +11,7 @@ import * as path from 'path';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 
 
-// ------------------------- Create renderer process -------------------------
+// ------------ Create new renderer process ------------
 
 const createWindow = () => {
     const window = new BrowserWindow({
@@ -22,11 +22,24 @@ const createWindow = () => {
         }
     })
     window.loadFile('dist/index.html');
+    return window;
 }
+
+// ----------- Create the first renderer process -----------
 
 app.whenReady().then(() => {
     createWindow();
 })
+
+// -------------- Send file content to all renderer processes ----------------
+
+function sendToAllRendererProcesses(rendererPID: number, data: string, filePath: string) {
+    const allWindows = BrowserWindow.getAllWindows();
+    allWindows.forEach(window => {
+        // Send the file content along with the newly created renderer's PID
+        window.webContents.send('file-content', {rendererPID, data, filePath});
+    });
+}
 
 // -------------- Listen for messages from the renderer process ---------------
 
@@ -78,13 +91,13 @@ ipcMain.on('save-file-as', (event, { data }) => {
     });
 });
 
-ipcMain.on('open-file', async (event) => {
+ipcMain.handle('dialog:openFile', async (event) => {
     // Let the user select a file from the local file manager
     dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
         if (!result.canceled && result.filePaths) {
             const filePath = result.filePaths[0];
             // Read the content of the selected file
-            fs.readFile(filePath, 'utf8', (err, data) => {
+            fs.readFile(filePath, 'utf8', async (err, data) => {
                 if (err) {
                     console.error('Error opening file:', err);
                     event.sender.send('open-file-response', { success: false, error: err });
@@ -92,10 +105,14 @@ ipcMain.on('open-file', async (event) => {
                     console.log('File opened successfully:', filePath);
                     event.sender.send('open-file-response', { success: true });
 
-                    // Create a new window/tab (i.e. a new renderer process)
-                    createWindow();
-                    // TODO: Send the file's content to the >new< renderer process
-                    // event.sender.send('file-content', data, filePath);
+                    // Create a new window (i.e. a new renderer process)
+                    const newRendererProcess = createWindow();
+                    // Wait for the 'ready-to-show' event before retrieving the process ID
+                    newRendererProcess.once('ready-to-show', () => {
+                        const newRendererPID = newRendererProcess.webContents.getOSProcessId();
+                        console.log('New renderer process PID:', newRendererPID);
+                        sendToAllRendererProcesses(newRendererPID, data, filePath);
+                    });
                 }
             });
         } else {
