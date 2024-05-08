@@ -1,4 +1,3 @@
-import { getCurrentWord } from './autocomplete';
 import * as Math_mode from './math_mode';
 import * as Text_mode from './text_mode';
 

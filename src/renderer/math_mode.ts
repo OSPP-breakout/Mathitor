@@ -1,8 +1,8 @@
-import { autoComplete } from "./autocomplete";
+import { autoComplete, clearSuggestions } from "./autoComplete/autocomplete";
 
 // Math mode global constants
-const shortCommands: string = require("./autoCommands.txt").replace(/[\n\r]+/g, " ");
-const shortOperators: string = require("./autoOperators.txt").replace(/[\n\r]+/g, " ");
+const shortCommands: string = require("./autoComplete/autoCommands.txt").replace(/[\n\r]+/g, " ");
+const shortOperators: string = require("./autoComplete/autoOperators.txt").replace(/[\n\r]+/g, " ");
 
 let mathMode = false;
 
@@ -19,6 +19,7 @@ export function create_MQ_field(): void {
     var newMQField = document.createElement('math-field' + amountOfMQFields.toString());
     newMQField.setAttribute('id', 'math-field' + amountOfMQFields.toString());
 
+
     //Insert the new field at caret position
     var range = (window.getSelection() as Selection).getRangeAt(0);
 
@@ -34,6 +35,8 @@ export function create_MQ_field(): void {
                 autoComplete(mathField);
             },
             moveOutOf: function (direction: any, mathfield: any) {
+                clearSuggestions();
+
                 mathMode = false;
                 mathfield.blur();
                 var range = document.createRange();
@@ -52,6 +55,9 @@ export function create_MQ_field(): void {
                 sel?.removeAllRanges();
                 sel?.addRange(range);
             },
+            selectOutOf: function (direction: any, mathfield: any) {
+                clearSuggestions();
+            },
             enter: function(mathField: any) {
                 const character = latexSpan.textContent?.charAt(latexSpan.textContent.length - 1);
                 mathField.keystroke("Backspace");
@@ -63,6 +69,8 @@ export function create_MQ_field(): void {
         autoCommands: shortCommands,
         autoOperatorNames: shortOperators
     });
+
+    mathField.el().querySelector('textarea').addEventListener('focusout', clearSuggestions);
 }
 
 export function handleCursor(e: any) {
