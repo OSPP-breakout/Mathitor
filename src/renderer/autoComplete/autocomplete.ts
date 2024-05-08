@@ -1,3 +1,9 @@
+// TODO: enclose functionality within a class, add a boolean attribute, as well as methods for 
+// checking if the autocompletion tab is open.  
+// TODO: make the suggestions selectable
+// TODO: make a pretty interface
+// TODO: add a feature for defining new aliases for one or multiple commands (optional)
+
 interface autoCompleteStatus {
     autoCompletable: boolean,
     matchingCharacters: number
