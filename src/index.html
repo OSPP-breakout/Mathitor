@@ -84,9 +84,7 @@
         <!-- MathQuill and JQuerry have to be referenced before index.js to avoid ReferenceError -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script>
         <script src="../mathquill-master/build/mathquill.js"></script>
-
-        <script src="index.js"></script>
-
+        
         <script>
             var MQ = MathQuill.getInterface(2)
             MQ.config({
@@ -95,5 +93,7 @@
                 leftRightIntoCmdGoes: 'up',
             })
         </script>
+
+        <script src="renderer.js"></script>
     </body>
 </html>
