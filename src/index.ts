@@ -1,13 +1,14 @@
-const electron = require("electron");
-const { app, BrowserWindow } = electron;
+const { app, BrowserWindow } = require('electron')
+
 
 const createWindow = () => {
     const window = new BrowserWindow({
-      width: 800,
-      height: 600,
     })
     
     window.loadFile('dist/index.html');
+    window.maximize();
+    window.show();
+    //add_listeners();
 }
 
 app.whenReady().then(() => {
