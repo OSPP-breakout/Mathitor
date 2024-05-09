@@ -67,27 +67,45 @@ ipcMain.on('set-title', (event, title) => {
     win?.setTitle(title);
 })
 
-ipcMain.on('save-file-as', (event, { data }) => {
+ipcMain.handle('save-file-as', async (event, { data }) => {
     // Get file path from user
     dialog.showSaveDialog({ defaultPath: 'file.txt' }).then((result) => {
         if (!result.canceled && result.filePath) {
+            const path: string = result.filePath;
             // Write data to file asynchronously
-            fs.writeFile(result.filePath, data, (err) => {
+            fs.writeFile(path, data, async (err) => {
                 if (err) {
-                    console.error('Error saving file:', err);
-                    event.sender.send('save-file-response', { success: false, error: err });
+                    console.error('Error saving file (as):', err);
+                    event.sender.send('save-file-as-response', { success: false, error: err });
                 } else {
-                    console.log('File saved successfully:', result.filePath);
-                    event.sender.send('save-file-response', { success: true });
+                    console.log('File saved (as) successfully:', path);
+                    event.sender.send('save-file-as-response', { success: true, filePath: path });
+                    //event.sender.send('save-file-as-response', { path });
                 }
             });
         } else {
-            console.log('File save operation canceled by user.');
-            event.sender.send('save-file-response', { success: false, error: 'File save operation canceled by user.' });
+            console.log('File save (as) operation canceled by user.');
+            event.sender.send('save-file-as-response', { success: false, error: 'File save (as) operation canceled by user.' });
         }
     }).catch((err) => {
-        console.error('Error showing save dialog:', err);
-        event.sender.send('save-file-response', { success: false, error: err });
+        console.error('Error showing save (as) dialog:', err);
+        event.sender.send('save-file-as-response', { success: false, error: err });
+    });
+});
+
+ipcMain.on('save-file', (event, { data }) => {
+    const toSave: string = data[0];
+    const path: string = data[1];
+
+    // Write data to file asynchronously
+    fs.writeFile(path, toSave, (err) => {
+        if (err) {
+            console.error('Error saving file:', err);
+            event.sender.send('save-file-response', { success: false, error: err });
+        } else {
+            console.log('File saved successfully:', path);
+            event.sender.send('save-file-response', { success: true });
+        }
     });
 });
 

@@ -3,16 +3,19 @@ const { contextBridge, ipcRenderer } = require('electron')
 export const API = {
     setTitle: (title: any) => ipcRenderer.send('set-title', title),
     openFileRequest: () => ipcRenderer.invoke('dialog:openFile'),
-    saveAsMessage: (toSave: String) => ipcRenderer.send('save-file-as', { data: toSave }),
-    //openFileMessage: (/*rendererPID: number*/) => ipcRenderer.send('open-file'/*, rendererPID*/),
+    saveAs: (toSave: string) => ipcRenderer.invoke('save-file-as', { data: toSave }),
+    save: (toSave: string, filePath: string) => ipcRenderer.send('save-file', { data: [toSave, filePath] }),
 
-    // openFileResponse: () => ipcRenderer.on('file-content', (event, { /*newRendererPID,*/ data, filePath }) => {
-    //     //console.log('Received new renderer PID:', newRendererPID); // TODO: Remove this line
-    //     console.log('Received file content:', data); // TODO: Remove this line
-    //     console.log('Received file path:', filePath); // TODO: Remove this line
-        
-    //     return [/*newRendererPID,*/ data, filePath];
-    // }),
+    saveAsResponse: () => new Promise<string>((resolve, reject) => {
+        ipcRenderer.once('save-file-as-response', (event, { success, filePath }) => {
+            console.log('Received file path (in saveAsResponse):', filePath);       // TODO: Remove this line
+            if (filePath) {
+                resolve(filePath);
+            } else {
+                reject(new Error('Received no file path'));
+            }
+        });
+    }),
 
     getFileContent: () => new Promise<Array<string>>((resolve, reject) => {
         ipcRenderer.once('file-content', (event, { rendererPID, data, filePath }) => {

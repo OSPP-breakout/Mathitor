@@ -2,18 +2,21 @@
 
 const textArea = document.getElementById('textarea') as HTMLElement;
 const fileName = document.getElementById('filename') as HTMLElement;
+const filePath = document.getElementById('filePath') as HTMLElement;
 const fileDropdown = document.getElementById("file-dropdown") as HTMLSelectElement;
 
-// // Listen for file content from the main process
+// Listen for file content from the main process
 window.electronAPI.getFileContent().then((fileContent: Array<string>) => {
     const data = fileContent[0] as string;
     const path = fileContent[1] as string;
+
     // Replace the text area in 'dist/index.html' with the file content
     textArea.outerHTML = data;
-    // TODO:
-    // (In 'dist/index.html') - Create an element where a file's file path can be stored
-    // (In the >new< renderer process) - Replace the empty file path element in 'dist/index.html' with the file's file path
-    // filePathElement = path;
+    // Replace the empty file path element in 'dist/index.html' with the file's file path
+    filePath.innerHTML = path;
+    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
+    console.log("filePath.outerHTML:\n\n" + filePath.outerHTML); // TODO: Remove this line
+
 }).catch((error: Error) => {
     console.error(error.message);
 });
@@ -33,42 +36,40 @@ export function fileManagementOption(): void {
 }
 
 function saveFileAs(): void {
-    //const rendererPID = window.electronAPI.getRendererPID();
     let toSave: string = textArea.outerHTML;
     console.log("toSave:\n\n" + toSave); // TODO: Remove this line
-    //console.log("Renderer PID: " + rendererPID); // TODO: Remove this line
+    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
+    // console.log("filePath.outerHTML:\n\n" + filePath.outerHTML); // TODO: Remove this line
 
     // Send the contents to be saved to the main process
-    window.electronAPI.saveAsMessage(toSave);
+    window.electronAPI.saveAs(toSave);
 
-    // TODO: Send toSave to main process, which in turn saves it as a txt file.
-    // Along with toSave, also send a flag indicating that we want to 'save as' not 'save'
+    // Replace the empty file path element in 'dist/index.html' with the file's file path
+    window.electronAPI.saveAsResponse().then((path: string) => {
+        filePath.innerHTML = path;
+    });
+
+    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
+
+    // TODO: Along with toSave, also send a flag indicating that we want to 'save as' not 'save' ??
 }
 
 function saveFile(): void {
-
+    let path: string = filePath.innerHTML;
+    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
+    // Check if it is the first save
+    if (path == "") {
+        saveFileAs();
+    } else {
+        let toSave: string = textArea.outerHTML;
+        // Send the contents (including the file path) to be saved to the main process
+        window.electronAPI.save(toSave, path);
+    }
 }
 
 function openFile(): void {
-    //const rendererPID = window.electronAPI.getRendererPID();
-
     // Send a message to the main process that the user wants to open a file
     window.electronAPI.openFileRequest();
-
-    // Listen for the file content from the main process
-    // const fileContent = window.electronAPI.openFileResponse() as unknown as Array<string>;
-    // //const newRendererPID = fileContent[0] as number;
-    // const data = fileContent[1] as string;
-    // const path = fileContent[2] as string;
-
-    // Replace the text area in 'dist/index.html' with the file content
-    //textArea.outerHTML = data;
-    //textArea.innerHTML = data;
-
-    // TODO:
-    // (In 'dist/index.html') - Create an element where a file's file path can be stored
-    // (In the >new< renderer process) - Replace the empty file path element in 'dist/index.html' with the file's file path
-    // filePathElement = path;
 }
 
 function createFile(): void {
