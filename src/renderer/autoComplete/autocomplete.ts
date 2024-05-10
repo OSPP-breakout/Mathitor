@@ -1,7 +1,6 @@
-// TODO: enclose functionality within a class, add a boolean attribute, as well as methods for 
-// checking if the autocompletion tab is open.  
 // TODO: make the suggestions selectable
 // TODO: make a pretty interface
+// TODO: fix bug where interface is still shown after deleting math field
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
 interface autoCompleteStatus {
@@ -14,55 +13,109 @@ interface suggestionEntry {
     actual: string
 }
 
-const keywords: Array<suggestionEntry> = [
-    {alias: "integral", actual: "integral"},
-    {alias: "haswell", actual: "haswell"},
-    {alias: "haswell-E", actual: "haswell-E"},
-    {alias: "haswell-D", actual: "haswell-D"},
-    {alias: "haswell-F", actual: "haswell-F"},
-    {alias: "better sounding on drugs", actual: "BSOD"},
-];
+export class suggestionTab {
+    private suggestionContainer: HTMLElement;
+    private keywords: Array<suggestionEntry>;
+    private currentMathField: any;
+    private open: boolean;
 
-const documentContainer = document.querySelector(".container");
+    constructor() {
+        this.open = false;
+        this.keywords = [
+            {alias: "integral", actual: "integral"},
+            {alias: "haswell", actual: "haswell"},
+            {alias: "haswellE", actual: "haswellE"},
+            {alias: "haswellD", actual: "haswellD"},
+            {alias: "haswellF", actual: "haswellF"},
+        ];
 
-const suggestionContainer = document.createElement("div");
-suggestionContainer.style.position = "absolute";
-documentContainer?.appendChild(suggestionContainer);
-
-
-export function autoComplete(mathField: any): void {
-    const mathFormula: string = mathField.latex();
-
-    let suggestions: Array<suggestionEntry> = getSuggestions(mathFormula);
-    updateSuggestionTabPlacement(mathField, suggestionContainer);
-    displaySuggestions(suggestions, suggestionContainer);
-}
-
-function getWordBeingWritten(mathFieldInput: string): string {
-    const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
-
-    let i = mathFieldInput.length - 1;
-    while ((i >= 0) && !delimiters.includes(mathFieldInput[i])) {
-        --i;
+        const documentContainer = document.querySelector(".container");
+        this.suggestionContainer = document.createElement("div");
+        this.suggestionContainer.style.position = "absolute";
+        documentContainer?.appendChild(this.suggestionContainer);
     }
 
-    return mathFieldInput[i] === "\\" 
-        ? ""
-        : mathFieldInput.substring(i + 1, mathFieldInput.length);
-}
+    autoComplete(mathField: any): void {
+        this.currentMathField = mathField;
+        const mathFormula: string = this.currentMathField.latex();
+    
+        let suggestions: Array<suggestionEntry> = this.getSuggestions(mathFormula);
+        this.updatePlacement(this.suggestionContainer);
+        this.displaySuggestions(suggestions);
+    }
 
+    close() {
+        this.open = false;
+        this.clearSuggestions();
+    }
 
-function getSuggestions(mathFieldInput: string): Array<suggestionEntry> {
-    const wordBeingWritten = getWordBeingWritten(mathFieldInput);
-    let suggestions: Array<suggestionEntry> = [];
+    isOpen(): boolean {
+        return this.open;
+    }
 
-    keywords.forEach(keyword => {
-        if (keyword.alias.startsWith(wordBeingWritten)) {
-            suggestions.push(keyword);
+    isClosed(): boolean {
+        return !this.open;
+    }
+
+    private getSuggestions(mathFieldInput: string): Array<suggestionEntry> {
+        const wordBeingWritten = this.getWordBeingWritten(mathFieldInput);
+        let suggestions: Array<suggestionEntry> = [];
+    
+        this.keywords.forEach(keyword => {
+            if (keyword.alias.startsWith(wordBeingWritten)) {
+                suggestions.push(keyword);
+            }
+        });
+    
+        return suggestions;
+    }
+
+    private clearSuggestions() {
+        const childCount = this.suggestionContainer.children.length;
+
+        for (let i = 0; i < childCount; ++i) {
+            this.suggestionContainer.lastChild?.remove();
         }
-    });
+    }
 
-    return suggestions;
+    private displaySuggestions(suggestions: Array<suggestionEntry>) {
+        this.open = true;
+        this.clearSuggestions();
+        
+        suggestions.forEach(suggestion => {
+            const option = document.createElement("div");
+            option.textContent = suggestion.alias;
+            this.suggestionContainer.appendChild(option);
+        });
+    }
+
+    private getWordBeingWritten(mathFieldInput: string): string {
+        const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
+    
+        let i = mathFieldInput.length - 1;
+        while ((i >= 0) && !delimiters.includes(mathFieldInput[i])) {
+            --i;
+        }
+    
+        return mathFieldInput[i] === "\\" 
+            ? ""
+            : mathFieldInput.substring(i + 1, mathFieldInput.length);
+    }
+    
+    private updatePlacement(tab: HTMLElement) {
+        this.currentMathField.focus();
+        let offset = this.currentMathField.__controller.cursor.offset();
+        if (offset === null) {
+            offset = { 'top': 0, 'left': 0 }
+        }
+        
+        const offsetFix = 20;
+        const topOffset = ((offset.top + offsetFix) as Number).toFixed() + "px";
+        const leftOffset = (offset.left as Number).toFixed() + "px";
+    
+        tab.style.top = topOffset;
+        tab.style.left = leftOffset;
+    }
 }
 
 // function autoCompleteWord(mathField: any, toCompleteWith: string) {
@@ -77,35 +130,3 @@ function getSuggestions(mathFieldInput: string): Array<suggestionEntry> {
 //         mathField.write(withoutMatches + "\\" + toCompleteWith);
 //     }
 // }
-
-function updateSuggestionTabPlacement(mathField: any, tab: HTMLElement) {
-    mathField.focus();
-    let offset = mathField.__controller.cursor.offset();
-    if (offset === null) {
-        offset = { 'top': 0, 'left': 0 }
-    }
-
-    const topOffset = (offset.top as Number).toFixed() + "px";
-    const leftOffset = (offset.left as Number).toFixed() + "px";
-
-    tab.style.top = topOffset;
-    tab.style.left = leftOffset;
-}
-
-export function clearSuggestions() {
-    const container = suggestionContainer;
-
-    while (container.lastChild !== null) {
-        container.lastChild.remove();
-    }
-}
-
-function displaySuggestions(suggestions: Array<suggestionEntry>, container: HTMLElement) {
-    clearSuggestions();
-    
-    suggestions.forEach(suggestion => {
-        const option = document.createElement("div");
-        option.textContent = suggestion.alias;
-        container.appendChild(option);
-    });
-}

@@ -1,11 +1,15 @@
 import { textArea, underline } from "./text_mode";
 
-import { autoComplete, clearSuggestions } from "./autoComplete/autocomplete";
+import { suggestionTab } from "./autoComplete/autocomplete";
 
 // Math mode global constants
 const shortCommands: string = require("./autoComplete/autoCommands.txt").replace(/[\n\r]+/g, " ");
 const shortOperators: string = require("./autoComplete/autoOperators.txt").replace(/[\n\r]+/g, " ");
 
+const suggestionsTab = new suggestionTab();
+const closeSuggestions = () => {
+    suggestionsTab.close();
+}
 let mathMode = false;
 
 declare var MathQuill: any;
@@ -55,10 +59,10 @@ export function create_MQ_field(): void {
         handlers: {
             edit: function () {
                 latexSpan.textContent = mathField.latex();
-                autoComplete(mathField);
+                suggestionsTab.autoComplete(mathField);
             },
             moveOutOf: function (direction: any, mathfield: any) {
-                clearSuggestions();
+                closeSuggestions();
 
                 mathfield.blur();
                 var range = document.createRange();
@@ -87,6 +91,7 @@ export function create_MQ_field(): void {
                 mathMode = false;
             },
             deleteOutOf: function(dir: number, mathfield: any) {
+                closeSuggestions();
                 mathMode = false;
                 mathfield.blur();
                 var range = document.createRange();
@@ -101,7 +106,7 @@ export function create_MQ_field(): void {
                 caretPos?.addRange(range);
             },
             selectOutOf: function (direction: any, mathfield: any) {
-                clearSuggestions();
+                closeSuggestions();
             },
             enter: function(mathField: any) {
                 const character = latexSpan.textContent?.charAt(latexSpan.textContent.length - 1);
@@ -115,7 +120,7 @@ export function create_MQ_field(): void {
         autoOperatorNames: shortOperators
     });
     
-    mathField.el().querySelector('textarea').addEventListener('focusout', clearSuggestions);
+    mathField.el().querySelector('textarea').addEventListener('focusout', closeSuggestions);
     window.getSelection()?.removeAllRanges();
     mathField.focus();
 }
