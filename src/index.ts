@@ -5,11 +5,23 @@ const { app, BrowserWindow } = electron; */
 
 // -------------------------------------------------
 
-//const electron = require("electron");
 import * as fs from 'fs';
 import * as path from 'path';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 
+
+// -------------- Check if file with a given file path is open ----------------
+
+function fileIsOpen(filePath: string) {
+    const allWindows = BrowserWindow.getAllWindows();
+    for (const window of allWindows) {
+        const title = window.getTitle();
+        if (title === filePath) {
+            return window;
+        }
+    }
+    return null;
+}
 
 // ------------ Create new renderer process ------------
 
@@ -31,16 +43,6 @@ app.whenReady().then(() => {
     createWindow();
 })
 
-// -------------- Send file content to all renderer processes ----------------
-
-function sendToAllRendererProcesses(rendererPID: number, data: string, filePath: string) {
-    const allWindows = BrowserWindow.getAllWindows();
-    allWindows.forEach(window => {
-        // Send the file content along with the newly created renderer's PID
-        window.webContents.send('file-content', {rendererPID, data, filePath});
-    });
-}
-
 // -------------- Listen for messages from the renderer process ---------------
 
 /* ipcMain.on('saveAs', (event, toSave) => {
@@ -61,7 +63,8 @@ function sendToAllRendererProcesses(rendererPID: number, data: string, filePath:
   /*  event.sender.send('saveAs: Result', 'File saved (NOT IMPLEMENTED YET)');
 }); */
 
-ipcMain.on('set-title', (event, title) => {
+
+ipcMain.handle('set-title', async (event, title) => {
     const webContents = event.sender;
     const win = BrowserWindow.fromWebContents(webContents);
     win?.setTitle(title);
@@ -80,7 +83,6 @@ ipcMain.handle('save-file-as', async (event, { data }) => {
                 } else {
                     console.log('File saved (as) successfully:', path);
                     event.sender.send('save-file-as-response', { success: true, filePath: path });
-                    //event.sender.send('save-file-as-response', { path });
                 }
             });
         } else {
@@ -93,10 +95,9 @@ ipcMain.handle('save-file-as', async (event, { data }) => {
     });
 });
 
-ipcMain.on('save-file', (event, { data }) => {
+ipcMain.handle('save-file', async (event, { data }) => {
     const toSave: string = data[0];
     const path: string = data[1];
-
     // Write data to file asynchronously
     fs.writeFile(path, toSave, (err) => {
         if (err) {
@@ -109,30 +110,38 @@ ipcMain.on('save-file', (event, { data }) => {
     });
 });
 
-ipcMain.handle('dialog:openFile', async (event) => {
+ipcMain.handle('open-file', async (event) => {
     // Let the user select a file from the local file manager
     dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
         if (!result.canceled && result.filePaths) {
             const filePath = result.filePaths[0];
-            // Read the content of the selected file
-            fs.readFile(filePath, 'utf8', async (err, data) => {
-                if (err) {
-                    console.error('Error opening file:', err);
-                    event.sender.send('open-file-response', { success: false, error: err });
-                } else {
-                    console.log('File opened successfully:', filePath);
-                    event.sender.send('open-file-response', { success: true });
+            const existingWindow = fileIsOpen(filePath);
+            if (existingWindow) {
+                // Set focus on the existing window (instead of opening the file a new window)
+                existingWindow.focus();
+                console.log('File is already open you fkn idiot:', filePath);
+            } else {
+                // Read the content of the selected file
+                fs.readFile(filePath, 'utf8', async (err, data) => {
+                    if (err) {
+                        console.error('Error opening file:', err);
+                        event.sender.send('open-file-response', { success: false, error: err });
+                    } else {
+                        console.log('File opened successfully:', filePath);
+                        event.sender.send('open-file-response', { success: true });
 
-                    // Create a new window (i.e. a new renderer process)
-                    const newRendererProcess = createWindow();
-                    // Wait for the 'ready-to-show' event before retrieving the process ID
-                    newRendererProcess.once('ready-to-show', () => {
-                        const newRendererPID = newRendererProcess.webContents.getOSProcessId();
-                        console.log('New renderer process PID:', newRendererPID);
-                        sendToAllRendererProcesses(newRendererPID, data, filePath);
-                    });
-                }
-            });
+                        // Create a new window (i.e. a new renderer process)
+                        const newRendererProcess = createWindow();
+                        // Wait for the 'ready-to-show' event before retrieving the renderer PID
+                        newRendererProcess.once('ready-to-show', () => {
+                            const newRendererPID = newRendererProcess.webContents.getOSProcessId();
+                            console.log('New renderer process PID:', newRendererPID);
+                            // Send the file content along with the newly created renderer's PID
+                            newRendererProcess.webContents.send('file-content', {rendererPID: newRendererPID, data, filePath});
+                        });
+                    }
+                });
+            }
         } else {
             console.log('Open file operation canceled by user.');
             event.sender.send('open-file-response', { success: false, error: 'Open file operation canceled by user.' });
@@ -142,4 +151,18 @@ ipcMain.handle('dialog:openFile', async (event) => {
         console.error('Error showing open dialog:', err);
         event.sender.send('open-file-response', { success: false, error: err });
     });
+});
+
+ipcMain.handle('create-file', async (event) => {
+    // Create a new window (i.e. a new renderer process)
+    try {
+        createWindow();
+        console.log('File created successfully');
+        event.sender.send('create-file-response', { success: true });
+
+    } catch {(err: NodeJS.ErrnoException) => {
+        console.error('Error creating new file:', err);
+        event.sender.send('create-file-response', { success: false, error: err });
+        }
+    }
 });

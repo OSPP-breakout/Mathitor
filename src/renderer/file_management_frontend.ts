@@ -1,7 +1,7 @@
-// import { ipcRenderer } from 'electron'; 
+// TODO: Error handling (i.e. handle all the responses from the file management backend)
 
 const textArea = document.getElementById('textarea') as HTMLElement;
-const fileName = document.getElementById('filename') as HTMLElement;
+// const fileName = document.getElementById('filename') as HTMLElement;
 const filePath = document.getElementById('filePath') as HTMLElement;
 const fileDropdown = document.getElementById("file-dropdown") as HTMLSelectElement;
 
@@ -9,13 +9,17 @@ const fileDropdown = document.getElementById("file-dropdown") as HTMLSelectEleme
 window.electronAPI.getFileContent().then((fileContent: Array<string>) => {
     const data = fileContent[0] as string;
     const path = fileContent[1] as string;
+    console.log('Received file path (in getFileContent  - frontend):', path);     // TODO: Remove this line
+    console.log('Received file content (in getFileContent  - frontend):', data);  // TODO: Remove this line
 
-    // Replace the text area in 'dist/index.html' with the file content
-    textArea.outerHTML = data;
-    // Replace the empty file path element in 'dist/index.html' with the file's file path
+    // Insert the file content in the textarea element in 'dist/index.html'
+    textArea.innerHTML = data;
+    // Insert the file's file path in the filePath element in 'dist/index.html'
     filePath.innerHTML = path;
-    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
-    console.log("filePath.outerHTML:\n\n" + filePath.outerHTML); // TODO: Remove this line
+    console.log("filePath.innerHTML (in getFileContent  - frontend):\n\n" + filePath.innerHTML); // TODO: Remove this line
+    console.log("textArea.innerHTML (in getFileContent  - frontend):\n\n" + textArea.innerHTML); // TODO: Remove this line
+
+    window.electronAPI.setTitle(path);
 
 }).catch((error: Error) => {
     console.error(error.message);
@@ -36,47 +40,48 @@ export function fileManagementOption(): void {
 }
 
 function saveFileAs(): void {
-    let toSave: string = textArea.outerHTML;
-    console.log("toSave:\n\n" + toSave); // TODO: Remove this line
-    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
-    // console.log("filePath.outerHTML:\n\n" + filePath.outerHTML); // TODO: Remove this line
+    let toSave: string = textArea.innerHTML;
+    console.log("toSave:\n\n" + toSave);                                         // TODO: Remove this line
+    console.log("filePath.innerHTML (in saveFileAs):\n\n" + filePath.innerHTML); // TODO: Remove this line
 
     // Send the contents to be saved to the main process
     window.electronAPI.saveAs(toSave);
 
-    // Replace the empty file path element in 'dist/index.html' with the file's file path
+    // Insert the file's file path in the filePath element in 'dist/index.html'
     window.electronAPI.saveAsResponse().then((path: string) => {
         filePath.innerHTML = path;
+        window.electronAPI.setTitle(path);
     });
 
-    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
-
-    // TODO: Along with toSave, also send a flag indicating that we want to 'save as' not 'save' ??
+    console.log("filePath.innerHTML (in saveFileAs):\n\n" + filePath.innerHTML); // TODO: Remove this line
 }
 
 function saveFile(): void {
     let path: string = filePath.innerHTML;
-    console.log("filePath.innerHTML:\n\n" + filePath.innerHTML); // TODO: Remove this line
-    // Check if it is the first save
+    console.log("filePath.innerHTML (in saveFile):\n\n" + filePath.innerHTML);   // TODO: Remove this line
+
+    // First save is handled by saveFileAs()
     if (path == "") {
         saveFileAs();
     } else {
-        let toSave: string = textArea.outerHTML;
-        // Send the contents (including the file path) to be saved to the main process
+        let toSave: string = textArea.innerHTML;
+        console.log("toSave (in saveFile):\n\n" + toSave);    // TODO: Remove this line
+        // Send the contents to be saved (including the file path) to the main process
         window.electronAPI.save(toSave, path);
     }
 }
 
 function openFile(): void {
-    // Send a message to the main process that the user wants to open a file
+    // Send an 'open file'-request to the main process
     window.electronAPI.openFileRequest();
 }
 
 function createFile(): void {
-
+    // Send a 'create file'-request to the main process
+    window.electronAPI.createFileRequest();
 }
 
 function exportAsPDF(): void {
-
+    // TODO...
 }
 
