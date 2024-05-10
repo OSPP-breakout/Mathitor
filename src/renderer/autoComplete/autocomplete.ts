@@ -3,11 +3,6 @@
 // TODO: fix bug where interface is still shown after deleting math field
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
-interface autoCompleteStatus {
-    autoCompletable: boolean,
-    matchingCharacters: number
-}
-
 interface suggestionEntry {
     alias: string,
     actual: string
@@ -40,7 +35,7 @@ export class suggestionTab {
         const mathFormula: string = this.currentMathField.latex();
     
         let suggestions: Array<suggestionEntry> = this.getSuggestions(mathFormula);
-        this.updatePlacement(this.suggestionContainer);
+        this.updatePlacement();
         this.displaySuggestions(suggestions);
     }
 
@@ -70,6 +65,9 @@ export class suggestionTab {
         return suggestions;
     }
 
+    /**
+     * Remove all div elements within the suggestion tab.
+     */
     private clearSuggestions() {
         const childCount = this.suggestionContainer.children.length;
 
@@ -89,6 +87,13 @@ export class suggestionTab {
         });
     }
 
+    /**
+     * Retrieve the word currently being written in a math field given the LaTeX output of the field.
+     * Note this only checks for input being written at the end of the mathfield.
+     * @param mathFieldInput 
+     * @returns The text currently being written in the math field containing `mathFieldInput`. An 
+     * empty string is returned if nothing is being written. 
+     */
     private getWordBeingWritten(mathFieldInput: string): string {
         const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
     
@@ -102,7 +107,9 @@ export class suggestionTab {
             : mathFieldInput.substring(i + 1, mathFieldInput.length);
     }
     
-    private updatePlacement(tab: HTMLElement) {
+    private updatePlacement() {
+        // TODO: refactor function and make it aware of different screen sizes and font sizes 
+        // (may be needed)
         this.currentMathField.focus();
         let offset = this.currentMathField.__controller.cursor.offset();
         if (offset === null) {
@@ -113,8 +120,8 @@ export class suggestionTab {
         const topOffset = ((offset.top + offsetFix) as Number).toFixed() + "px";
         const leftOffset = (offset.left as Number).toFixed() + "px";
     
-        tab.style.top = topOffset;
-        tab.style.left = leftOffset;
+        this.suggestionContainer.style.top = topOffset;
+        this.suggestionContainer.style.left = leftOffset;
     }
 }
 
