@@ -1,5 +1,4 @@
 // TODO: make suggestions clickable (this may already work).
-// TODO: make it possible to complete the text. 
 // TODO: add CSS style
 // TODO: fix bug where interface is still shown after deleting math field
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
@@ -22,24 +21,19 @@ export class suggestionTab {
     private currentMathField: any;
     private openStatus: boolean;
     private displayInfo: suggestionRange;
+    private wordBeingWritten: string;
 
     constructor() {
         this.displayInfo = {maxRangeSize: 5, start: 0, end: 0};
         this.openStatus = false;
         this.possibleSuggestions = [
             {alias: "integral", actual: "integral"},
-            {alias: "a1", actual: "haswell"},
-            {alias: "a2", actual: "haswellE"},
-            {alias: "a3", actual: "haswellD"},
-            {alias: "a4", actual: "haswellF"},
-            {alias: "a5", actual: "haswellF"},
-            {alias: "a6", actual: "haswellF"},
-            {alias: "a7", actual: "haswellF"},
-            {alias: "a8", actual: "haswellF"},
-            {alias: "a9", actual: "haswellF"},
-            {alias: "läsk", actual: "haswellF"},
+            {alias: "summation", actual: "summation"},
+            {alias: "product", actual: "product"},
+            {alias: "pq-formula", actual: ""}
         ];
         this.currentSuggestions = this.possibleSuggestions;
+        this.wordBeingWritten = "";
 
         const documentContainer = document.querySelector(".container");
         this.suggestionContainer = document.createElement("div");
@@ -91,13 +85,6 @@ export class suggestionTab {
     }
 
     /**
-     * Complete the word that is being written within the MathQuill math field with the currently selected suggestion. 
-     */
-    private complete() {
-        this.blur();
-    }
-
-    /**
      * Remove all div elements within the suggestion tab.
      */
     private clearSuggestions() {
@@ -122,11 +109,11 @@ export class suggestionTab {
     }
 
     private updateCurrentSuggestions(mathFieldInput: string) {
-        const wordBeingWritten = this.getWordBeingWritten(mathFieldInput);
+        this.getWordBeingWritten(mathFieldInput);
         let suggestions: Array<suggestionEntry> = [];
     
         this.possibleSuggestions.forEach(keyword => {
-            if (keyword.alias.startsWith(wordBeingWritten)) {
+            if (keyword.alias.startsWith(this.wordBeingWritten)) {
                 suggestions.push(keyword);
             }
         });
@@ -155,13 +142,11 @@ export class suggestionTab {
     }
 
     /**
-     * Retrieve the word currently being written in a math field given the LaTeX output of the field.
+     * Update the word currently being written in a math field given the LaTeX output of the field.
      * Note this only checks for input being written at the end of the mathfield.
      * @param mathFieldInput 
-     * @returns The text currently being written in the math field containing `mathFieldInput`. An 
-     * empty string is returned if nothing is being written. 
      */
-    private getWordBeingWritten(mathFieldInput: string): string {
+    private getWordBeingWritten(mathFieldInput: string) {
         const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
     
         let i = mathFieldInput.length - 1;
@@ -169,7 +154,7 @@ export class suggestionTab {
             --i;
         }
         
-        return mathFieldInput[i] === "\\" 
+        this.wordBeingWritten = mathFieldInput[i] === "\\" 
             ? ""
             : mathFieldInput.substring(i + 1, mathFieldInput.length).toLowerCase();
     }
@@ -227,8 +212,21 @@ export class suggestionTab {
         return option;
     }
 
-    private suggestionFocus(e: any) {
-        
+    /**
+     * Complete the word that is being written within the MathQuill math field with the currently selected suggestion. 
+     */
+    private suggestionComplete(suggestion: HTMLDivElement) {
+        const toCompleteWith = suggestion.getAttribute("suggestionValue");
+        this.blur();
+
+        const mathFormula: string = this.currentMathField.latex();
+        const withoutWordToComplete = mathFormula.substring(0, mathFormula.length - this.wordBeingWritten.length);
+
+        this.currentMathField.select();
+        console.log(mathFormula + "\\" + toCompleteWith);
+        console.log(mathFormula);
+        console.log(withoutWordToComplete);
+        this.currentMathField.write(withoutWordToComplete + "\\" + toCompleteWith);
     }
 
     private suggestionBlur(e: any) {
@@ -253,7 +251,7 @@ export class suggestionTab {
                 this.blur();
                 break;
             case "Enter": 
-                this.complete();
+                this.suggestionComplete(e.target);
                 break;
             case "ArrowDown": 
                 this.selectNextSuggestion(e.target);
