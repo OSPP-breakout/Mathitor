@@ -120,7 +120,7 @@ export function create_MQ_field(): void {
         autoOperatorNames: shortOperators
     });
     
-    mathField.el().querySelector('textarea').addEventListener('focusout', closeSuggestions);
+    //mathField.el().querySelector('textarea').addEventListener('focusout', closeSuggestions);
     window.getSelection()?.removeAllRanges();
     mathField.focus();
 }
