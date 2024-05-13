@@ -82,6 +82,30 @@ export class suggestionTab {
         this.currentMathField.focus();
     }
 
+    /**
+     * Remove all div elements within the suggestion tab.
+     */
+    private clearSuggestions() {
+        this.clearDisplayRange();
+
+        const childCount = this.suggestionContainer.children.length;
+        for (let i = 0; i < childCount; ++i) {
+            this.suggestionContainer.lastChild?.remove();
+        }
+    }
+
+    private displaySuggestions() {
+        this.openStatus = true;
+        this.clearSuggestions();
+
+        const limit = this.currentSuggestions.length < this.displayInfo.maxRangeSize ? this.currentSuggestions.length : this.displayInfo.maxRangeSize;
+        for (let i = 0; i < limit; ++i) {
+            this.addSuggestionLast(this.currentSuggestions[i]);
+        }
+
+        this.displayInfo.end = limit - 1;
+    }
+
     private updateCurrentSuggestions(mathFieldInput: string) {
         const wordBeingWritten = this.getWordBeingWritten(mathFieldInput);
         let suggestions: Array<suggestionEntry> = [];
@@ -96,32 +120,23 @@ export class suggestionTab {
     }
 
     /**
-     * Remove all div elements within the suggestion tab.
+     * Update the absolute position of the component.
      */
-    private clearSuggestions() {
-        this.clearSuggestionRange();
-
-        const childCount = this.suggestionContainer.children.length;
-        for (let i = 0; i < childCount; ++i) {
-            this.suggestionContainer.lastChild?.remove();
+    private updatePlacement() {
+        // TODO: refactor function and make it aware of different screen sizes and font sizes 
+        // (may be needed)
+        this.currentMathField.focus();
+        let offset = this.currentMathField.__controller.cursor.offset();
+        if (offset === null) {
+            offset = { 'top': 0, 'left': 0 }
         }
-    }
-
-    private clearSuggestionRange() {
-        this.displayInfo.start = 0;
-        this.displayInfo.end = 0;
-    }
-
-    private displaySuggestions() {
-        this.openStatus = true;
-        this.clearSuggestions();
-
-        const limit = this.currentSuggestions.length < this.displayInfo.maxRangeSize ? this.currentSuggestions.length : this.displayInfo.maxRangeSize;
-        for (let i = 0; i < limit; ++i) {
-            this.addSuggestionLast(this.currentSuggestions[i]);
-        }
-
-        this.displayInfo.end = limit - 1;
+        
+        const offsetFix = 20;
+        const topOffset = ((offset.top + offsetFix) as Number).toFixed() + "px";
+        const leftOffset = (offset.left as Number).toFixed() + "px";
+    
+        this.suggestionContainer.style.top = topOffset;
+        this.suggestionContainer.style.left = leftOffset;
     }
 
     /**
@@ -144,24 +159,25 @@ export class suggestionTab {
             : mathFieldInput.substring(i + 1, mathFieldInput.length).toLowerCase();
     }
     
-    /**
-     * Update the absolute position of the component.
-     */
-    private updatePlacement() {
-        // TODO: refactor function and make it aware of different screen sizes and font sizes 
-        // (may be needed)
-        this.currentMathField.focus();
-        let offset = this.currentMathField.__controller.cursor.offset();
-        if (offset === null) {
-            offset = { 'top': 0, 'left': 0 }
-        }
-        
-        const offsetFix = 20;
-        const topOffset = ((offset.top + offsetFix) as Number).toFixed() + "px";
-        const leftOffset = (offset.left as Number).toFixed() + "px";
-    
-        this.suggestionContainer.style.top = topOffset;
-        this.suggestionContainer.style.left = leftOffset;
+    private clearDisplayRange() {
+        this.displayInfo.start = 0;
+        this.displayInfo.end = 0;
+    }
+
+    private moveDisplayRangeForward() {
+        const currentStart = this.displayInfo.start;
+        const currentEnd = this.displayInfo.end;
+
+        this.displayInfo.start = currentStart + 1;
+        this.displayInfo.end = currentEnd + 1;
+    } 
+
+    private moveDisplayRangeBackward() {
+        const currentStart = this.displayInfo.start;
+        const currentEnd = this.displayInfo.end;
+
+        this.displayInfo.start = currentStart - 1;
+        this.displayInfo.end = currentEnd - 1;
     }
 
     /**
@@ -221,22 +237,6 @@ export class suggestionTab {
                 break;
         }
     }
-
-    private moveDisplayRangeForward() {
-        const currentStart = this.displayInfo.start;
-        const currentEnd = this.displayInfo.end;
-
-        this.displayInfo.start = currentStart + 1;
-        this.displayInfo.end = currentEnd + 1;
-    } 
-
-    private moveDisplayRangeBackward() {
-        const currentStart = this.displayInfo.start;
-        const currentEnd = this.displayInfo.end;
-
-        this.displayInfo.start = currentStart - 1;
-        this.displayInfo.end = currentEnd - 1;
-    } 
 
     /**
      * Show the previous, hidden suggestion. This assumes the currently selected suggestion is the first shown.
