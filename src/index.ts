@@ -15,6 +15,9 @@ const createWindow = () => {
         }
     })
     window.loadFile('dist/index.html');
+    window.maximize();
+    window.show();
+    //add_listeners();
     return window;
 }
 

@@ -1,6 +1,7 @@
-import * as Math_mode from './math_mode';
-import * as Text_mode from './text_mode';
-import * as File_management from './file_management_frontend';
+import * as FileManagement from './file_management_frontend';
+import * as ModeMode from './mathMode/math_mode';
+import * as MathModeCaret from './mathMode/caret';
+import * as TextMode from './text_mode';
 
 interface Listener_info {
     element_id: string;
@@ -9,28 +10,29 @@ interface Listener_info {
 }
 
 const listeners: Array<Listener_info> = [
-    { element_id: 'font-size', action: 'change', callback: Text_mode.font_size },
-    { element_id: 'selector-heading', action: 'change', callback: Text_mode.add_heading },
-    { element_id: 'selector-color', action: 'change', callback: Text_mode.change_color },
-    { element_id: 'selector-color', action: 'input', callback: Text_mode.change_color },
-    { element_id: 'btn-undo', action: 'click', callback: Text_mode.undo },
-    { element_id: 'btn-redo', action: 'click', callback: Text_mode.redo },
-    { element_id: 'btn-ordered-list', action: 'click', callback: Text_mode.add_ordered_list },
-    { element_id: 'btn-unordered-list', action: 'click', callback: Text_mode.add_unordered_list },
-    { element_id: 'btn-link', action: 'click', callback: Text_mode.add_link },
-    { element_id: 'btn-unlink', action: 'click', callback: Text_mode.remove_link },
-    { element_id: 'btn-bold', action: 'click', callback: Text_mode.bold },
-    { element_id: 'btn-italic', action: 'click', callback: Text_mode.italic },
-    { element_id: 'btn-underline', action: 'click', callback: Text_mode.underline },
-    { element_id: 'btn-align-l', action: 'click', callback: Text_mode.align_left },
-    { element_id: 'btn-align-c', action: 'click', callback: Text_mode.align_center },
-    { element_id: 'btn-align-r', action: 'click', callback: Text_mode.align_right },
-    { element_id: 'lower-upper', action: 'click', callback: Text_mode.text_lower_or_upper },
-    { element_id: 'btn-slash', action: 'click', callback: Text_mode.text_slash },
-    { element_id: 'button-MQ', action: 'click', callback: Math_mode.create_MQ_field },
-    { element_id: 'textarea', action: 'keyup', callback: Math_mode.handleCursor },
-    { element_id: 'btn-justify-full', action: 'click', callback: Text_mode.justify_full },
-    { element_id: 'file-dropdown', action: 'change', callback: File_management.fileManagementOption }
+    { element_id: 'font-size', action: 'change', callback: TextMode.font_size },
+    { element_id: 'selector-heading', action: 'change', callback: TextMode.add_heading },
+    { element_id: 'selector-color', action: 'change', callback: TextMode.change_color },
+    { element_id: 'selector-color', action: 'input', callback: TextMode.change_color },
+    { element_id: 'btn-undo', action: 'click', callback: TextMode.undo },
+    { element_id: 'btn-redo', action: 'click', callback: TextMode.redo },
+    { element_id: 'btn-ordered-list', action: 'click', callback: TextMode.add_ordered_list },
+    { element_id: 'btn-unordered-list', action: 'click', callback: TextMode.add_unordered_list },
+    { element_id: 'btn-link', action: 'click', callback: TextMode.add_link },
+    { element_id: 'btn-unlink', action: 'click', callback: TextMode.remove_link },
+    { element_id: 'btn-bold', action: 'click', callback: TextMode.bold },
+    { element_id: 'btn-italic', action: 'click', callback: TextMode.italic },
+    { element_id: 'btn-underline', action: 'click', callback: TextMode.underline },
+    { element_id: 'btn-align-l', action: 'click', callback: TextMode.align_left },
+    { element_id: 'btn-align-c', action: 'click', callback: TextMode.align_center },
+    { element_id: 'btn-align-r', action: 'click', callback: TextMode.align_right },
+    { element_id: 'lower-upper', action: 'click', callback: TextMode.text_lower_or_upper },
+    { element_id: 'btn-slash', action: 'click', callback: TextMode.text_slash },
+    { element_id: 'button-MQ', action: 'click', callback: ModeMode.createMathField },
+    { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
+    { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
+    { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
+    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
 ];
 
 export function add_listeners() {

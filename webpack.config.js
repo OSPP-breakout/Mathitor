@@ -24,6 +24,10 @@ module.exports = {
                 test: /\.css/,
                 type: 'asset/resource',
                 include: [path.resolve(__dirname, 'src')]
+            },
+            {
+                test: /\.txt/,
+                type: 'asset/source'
             }
         ]
     },
