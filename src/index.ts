@@ -1,27 +1,8 @@
-/* import { ipcMain } from 'electron';
-
-const electron = require("electron");
-const { app, BrowserWindow } = electron; */
-
-// -------------------------------------------------
-
 import * as fs from 'fs';
 import * as path from 'path';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 
-
-// -------------- Check if file with a given file path is open ----------------
-
-function fileIsOpen(filePath: string) {
-    const allWindows = BrowserWindow.getAllWindows();
-    for (const window of allWindows) {
-        const title = window.getTitle();
-        if (title === filePath) {
-            return window;
-        }
-    }
-    return null;
-}
+// TODO: Move file management code to file_management_backend.ts
 
 // ------------ Create new renderer process ------------
 
@@ -43,125 +24,130 @@ app.whenReady().then(() => {
     createWindow();
 })
 
-// -------------- Listen for messages from the renderer process ---------------
+// ------------------- File Management ---------------------
 
-/* ipcMain.on('saveAs', (event, toSave) => {
-    console.log('File contents to save: ', toSave);
-
-    // TODO: Decomment below*/
-    
-    /* try {
-        // Save the file
-        file_management_backend.saveFileAs(toSave);
-    } catch {
-        // Catch and log errors when saving
-        // TODO: Maybe implement other error handling?
-        event.sender.send('saveAs: Result', 'Error: File could not be saved');
+// Check if file with a given file path is open
+function fileIsOpen(filePath: string) {
+    const allWindows = BrowserWindow.getAllWindows();
+    for (const window of allWindows) {
+        const title = window.getTitle();
+        if (title === filePath) {
+            return window;
+        }
     }
- */
-    // Confirm that the file was saved.
-  /*  event.sender.send('saveAs: Result', 'File saved (NOT IMPLEMENTED YET)');
-}); */
+    return null;
+}
 
-
+// Set the title of a Mathitor window
 ipcMain.handle('set-title', async (event, title) => {
     const webContents = event.sender;
     const win = BrowserWindow.fromWebContents(webContents);
     win?.setTitle(title);
 })
 
+// Backend of the saveFileAs() function. Writes 'data' to a path chosen by the user
 ipcMain.handle('save-file-as', async (event, { data }) => {
-    // Get file path from user
+
+    // Let the user select name and path for the file
     dialog.showSaveDialog({ defaultPath: 'file.txt' }).then((result) => {
+        
         if (!result.canceled && result.filePath) {
             const path: string = result.filePath;
-            // Write data to file asynchronously
             fs.writeFile(path, data, async (err) => {
+                
                 if (err) {
-                    console.error('Error saving file (as):', err);
+                    console.error('Error saving file:\n', err);
                     event.sender.send('save-file-as-response', { success: false, error: err });
                 } else {
-                    console.log('File saved (as) successfully:', path);
+                    console.log('File saved successfully:\n', path);
                     event.sender.send('save-file-as-response', { success: true, filePath: path });
                 }
             });
+
         } else {
-            console.log('File save (as) operation canceled by user.');
-            event.sender.send('save-file-as-response', { success: false, error: 'File save (as) operation canceled by user.' });
+            console.log('\'Save as\'-operation canceled by user.');
+            event.sender.send('save-file-as-response', { success: false, error: '\'Save as\'-operation canceled by user.' });
         }
+        
     }).catch((err) => {
-        console.error('Error showing save (as) dialog:', err);
+        console.error('Error showing \'Save as\'-dialog:', err);
         event.sender.send('save-file-as-response', { success: false, error: err });
     });
 });
 
+// Backend of the saveFile() function
 ipcMain.handle('save-file', async (event, { data }) => {
-    const toSave: string = data[0];
-    const path: string = data[1];
-    // Write data to file asynchronously
+    const toSave: string = data[0]; // File contents to save
+    const path: string = data[1]; // Path of the file to save
     fs.writeFile(path, toSave, (err) => {
         if (err) {
-            console.error('Error saving file:', err);
+            console.error('Error saving file:\n', err);
             event.sender.send('save-file-response', { success: false, error: err });
         } else {
-            console.log('File saved successfully:', path);
+            console.log('File saved successfully:\n', path);
             event.sender.send('save-file-response', { success: true });
         }
     });
 });
 
+// Backend of the openFile() function
 ipcMain.handle('open-file', async (event) => {
+
     // Let the user select a file from the local file manager
     dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
+        
         if (!result.canceled && result.filePaths) {
             const filePath = result.filePaths[0];
             const existingWindow = fileIsOpen(filePath);
+            
+            // If the selected file is already open in a window, toggle
+            // focus on that window instead of opening another identical window
             if (existingWindow) {
-                // Set focus on the existing window (instead of opening the file a new window)
                 existingWindow.focus();
-                console.log('File is already open you fkn idiot:', filePath);
+                console.log('The selected file is already open:\n', filePath);
+            
+            // If the selected file is not already open, open it in a new window
             } else {
-                // Read the content of the selected file
                 fs.readFile(filePath, 'utf8', async (err, data) => {
                     if (err) {
-                        console.error('Error opening file:', err);
+                        console.error('Error opening file:\n', err);
                         event.sender.send('open-file-response', { success: false, error: err });
                     } else {
-                        console.log('File opened successfully:', filePath);
+                        console.log('File opened successfully:\n', filePath);
                         event.sender.send('open-file-response', { success: true });
 
                         // Create a new window (i.e. a new renderer process)
                         const newRendererProcess = createWindow();
-                        // Wait for the 'ready-to-show' event before retrieving the renderer PID
                         newRendererProcess.once('ready-to-show', () => {
                             const newRendererPID = newRendererProcess.webContents.getOSProcessId();
-                            console.log('New renderer process PID:', newRendererPID);
-                            // Send the file content along with the newly created renderer's PID
+                            console.log('New renderer process PID:\n', newRendererPID);
+                            // Send file content to the new renderer process
                             newRendererProcess.webContents.send('file-content', {rendererPID: newRendererPID, data, filePath});
                         });
                     }
                 });
             }
+        
         } else {
-            console.log('Open file operation canceled by user.');
-            event.sender.send('open-file-response', { success: false, error: 'Open file operation canceled by user.' });
+            console.log('\'Open file\'-operation canceled by user.');
+            event.sender.send('open-file-response', { success: false, error: '\'Open file\'-operation canceled by user.' });
         }
 
     }).catch((err) => {
-        console.error('Error showing open dialog:', err);
+        console.error('Error showing open dialog:\n', err);
         event.sender.send('open-file-response', { success: false, error: err });
     });
 });
 
+// Backend of the createFile() function
 ipcMain.handle('create-file', async (event) => {
-    // Create a new window (i.e. a new renderer process)
     try {
         createWindow();
         console.log('File created successfully');
         event.sender.send('create-file-response', { success: true });
 
     } catch {(err: NodeJS.ErrnoException) => {
-        console.error('Error creating new file:', err);
+        console.error('Error creating new file:\n', err);
         event.sender.send('create-file-response', { success: false, error: err });
         }
     }

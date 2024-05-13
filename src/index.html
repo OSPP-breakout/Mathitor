@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         
         <title>Maethitor</title>
-        <span id="filePath" style="display: none;"></span>
+        <span id="filepath" style="display: none;"></span>
 
         <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
         <link rel="stylesheet" href="<%= require('./style.css') %>" />
@@ -20,17 +20,13 @@
             <div class="toolbar">
                 <div class="head">
                     <!-- <input type="text" placeholder="File name" value="" id="filename"> -->
-                    <!-- <span id="filename">File name</span> -->
                     <select id="file-dropdown">
                         <option value="" selected="" hidden="" disabled="">File</option>
-                        <!-- <option value="" hidden="" disabled="">File</option> -->
                         <option value="new">New file</option> 
                         <option value="open">Open</option> 
                         <option value="save">Save</option> 
                         <option value="saveAs">Save as</option> 
                         <option value="pdf">Export as PDF</option>
-                        <!-- <option value="txt">Save as txt</option>
-                        <option value="pdf">Save as pdf</option> -->
                         </select>
                     <select id="selector-heading" this.selectedIndex=0;">
                         <option value="" selected="" hidden="" disabled="">Format</option>
