@@ -59,7 +59,7 @@ export function createMathField(): void {
             },
         },
     });
-    const mathSpanObserver = new MutationObserver(fixMathSpan);
+    const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
     window.getSelection()?.removeAllRanges();
@@ -152,9 +152,9 @@ export function isInsideMathField() {
     }
 }
 
-function fixMathSpan(record: any, observer: any) {
+function fixMathSpan(record: MutationRecord, observer: any) {
     const removedNodes = record.removedNodes;
-    removedNodes.forEach(element as any=> {
+    removedNodes.forEach(element => {
         if (element.nodeName.startsWith("SPAN")) {
             const span = document.createElement("span");
             span.textContent = "\u00A0";
