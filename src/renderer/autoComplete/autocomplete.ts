@@ -1,6 +1,7 @@
 // TODO: make suggestions clickable (this may already work).
 // TODO: add CSS style
 // TODO: fix bug where interface is still shown after deleting math field
+// TODO: (if possible) Do not show suggestion tab within subscript or superscript elements.
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
 interface suggestionEntry {
