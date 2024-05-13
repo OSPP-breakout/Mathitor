@@ -1,4 +1,3 @@
-// TODO: make the suggestions selectable
 // TODO: make a pretty interface
 // TODO: fix bug where interface is still shown after deleting math field
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
@@ -8,24 +7,37 @@ interface suggestionEntry {
     actual: string
 }
 
+interface suggestionRange {
+    maxRangeSize: number,
+    start: number,
+    end: number
+}
+
 export class suggestionTab {
     private suggestionContainer: HTMLElement;
-    private keywords: Array<suggestionEntry>;
+    private possibleSuggestions: Array<suggestionEntry>;
+    private currentSuggestions: Array<suggestionEntry>;
     private currentMathField: any;
-    private open: boolean;
-    private maxRangeSize: number;
+    private openStatus: boolean;
+    private displayInfo: suggestionRange;
 
     constructor() {
-        this.maxRangeSize = 5;
-        this.open = false;
-        this.keywords = [
+        this.displayInfo = {maxRangeSize: 5, start: 0, end: 0};
+        this.openStatus = false;
+        this.possibleSuggestions = [
             {alias: "integral", actual: "integral"},
-            {alias: "haswell", actual: "haswell"},
-            {alias: "haswellE", actual: "haswellE"},
-            {alias: "haswellD", actual: "haswellD"},
-            {alias: "haswellF", actual: "haswellF"},
+            {alias: "a1", actual: "haswell"},
+            {alias: "a2", actual: "haswellE"},
+            {alias: "a3", actual: "haswellD"},
+            {alias: "a4", actual: "haswellF"},
+            {alias: "a5", actual: "haswellF"},
+            {alias: "a6", actual: "haswellF"},
+            {alias: "a7", actual: "haswellF"},
+            {alias: "a8", actual: "haswellF"},
+            {alias: "a9", actual: "haswellF"},
             {alias: "läsk", actual: "haswellF"},
         ];
+        this.currentSuggestions = this.possibleSuggestions;
 
         const documentContainer = document.querySelector(".container");
         this.suggestionContainer = document.createElement("div");
@@ -37,29 +49,30 @@ export class suggestionTab {
      * Display the suggestion tab with suggestions based on the word that is being written within `mathField`. 
      * @param mathField A MathQuill mathField.
      */
-    autoComplete(mathField: any) {
+    open(mathField: any) {
+        this.openStatus = true;
         this.currentMathField = mathField;
         const mathFormula: string = this.currentMathField.latex();
     
-        let suggestions: Array<suggestionEntry> = this.getSuggestions(mathFormula);
+        this.updateCurrentSuggestions(mathFormula);
         this.updatePlacement();
-        this.displaySuggestions(suggestions);
+        this.displaySuggestions();
     }
 
     /**
      * Close the suggestion tab. Nothing happens if this is called when the suggestion tab is closed.
      */
     close() {
-        this.open = false;
+        this.openStatus = false;
         this.clearSuggestions();
     }
 
     isOpen(): boolean {
-        return this.open;
+        return this.openStatus;
     }
 
     isClosed(): boolean {
-        return !this.open;
+        return !this.openStatus;
     }
 
     /**
@@ -69,37 +82,46 @@ export class suggestionTab {
         this.currentMathField.focus();
     }
 
-    private getSuggestions(mathFieldInput: string): Array<suggestionEntry> {
+    private updateCurrentSuggestions(mathFieldInput: string) {
         const wordBeingWritten = this.getWordBeingWritten(mathFieldInput);
         let suggestions: Array<suggestionEntry> = [];
     
-        this.keywords.forEach(keyword => {
+        this.possibleSuggestions.forEach(keyword => {
             if (keyword.alias.startsWith(wordBeingWritten)) {
                 suggestions.push(keyword);
             }
         });
     
-        return suggestions;
+        this.currentSuggestions = suggestions;
     }
 
     /**
      * Remove all div elements within the suggestion tab.
      */
     private clearSuggestions() {
-        const childCount = this.suggestionContainer.children.length;
+        this.clearSuggestionRange();
 
+        const childCount = this.suggestionContainer.children.length;
         for (let i = 0; i < childCount; ++i) {
             this.suggestionContainer.lastChild?.remove();
         }
     }
 
-    private displaySuggestions(suggestions: Array<suggestionEntry>) {
-        this.open = true;
+    private clearSuggestionRange() {
+        this.displayInfo.start = 0;
+        this.displayInfo.end = 0;
+    }
+
+    private displaySuggestions() {
+        this.openStatus = true;
         this.clearSuggestions();
-        
-        suggestions.forEach(suggestion => {
-            this.addSuggestion(suggestion);
-        });
+
+        const limit = this.currentSuggestions.length < this.displayInfo.maxRangeSize ? this.currentSuggestions.length : this.displayInfo.maxRangeSize;
+        for (let i = 0; i < limit; ++i) {
+            this.addSuggestionLast(this.currentSuggestions[i]);
+        }
+
+        this.displayInfo.end = limit - 1;
     }
 
     /**
@@ -116,7 +138,7 @@ export class suggestionTab {
         while ((i >= 0) && !delimiters.includes(mathFieldInput[i])) {
             --i;
         }
-    
+        
         return mathFieldInput[i] === "\\" 
             ? ""
             : mathFieldInput.substring(i + 1, mathFieldInput.length).toLowerCase();
@@ -146,15 +168,32 @@ export class suggestionTab {
      * Adds a new suggestion to the suggestion tab.
      * @param suggestion The display name of the suggestion and its value.
      */
-    private addSuggestion(suggestion: suggestionEntry) {
+    private addSuggestionFirst(suggestion: suggestionEntry): HTMLDivElement {
         const option = document.createElement("div");
-        this.suggestionContainer.appendChild(option);
+        this.suggestionContainer.prepend(option);
         
         option.textContent = suggestion.alias;
         option.setAttribute("actualValue", suggestion.actual);
         option.tabIndex = 0;
         
         this.addSuggestionListeners(option);
+        return option;
+    }
+
+    /**
+     * Adds a new suggestion to the suggestion tab.
+     * @param suggestion The display name of the suggestion and its value.
+     */
+    private addSuggestionLast(suggestion: suggestionEntry): HTMLDivElement {
+        const option = document.createElement("div");
+        this.suggestionContainer.append(option);
+        
+        option.textContent = suggestion.alias;
+        option.setAttribute("actualValue", suggestion.actual);
+        option.tabIndex = 0;
+        
+        this.addSuggestionListeners(option);
+        return option;
     }
 
     private suggestionFocus(e: any) {
@@ -183,11 +222,71 @@ export class suggestionTab {
         }
     }
 
+    private moveDisplayRangeForward() {
+        const currentStart = this.displayInfo.start;
+        const currentEnd = this.displayInfo.end;
+
+        this.displayInfo.start = currentStart + 1;
+        this.displayInfo.end = currentEnd + 1;
+    } 
+
+    private moveDisplayRangeBackward() {
+        const currentStart = this.displayInfo.start;
+        const currentEnd = this.displayInfo.end;
+
+        this.displayInfo.start = currentStart - 1;
+        this.displayInfo.end = currentEnd - 1;
+    } 
+
+    /**
+     * Show the previous, hidden suggestion. This assumes the currently selected suggestion is the first shown.
+     * @returns The previously hidden suggestion, if there were any.
+     */
+    private showPreviousHiddenSuggestion(): HTMLDivElement | null {
+        // Update the visible suggestion range
+
+        if (this.displayInfo.start > 0) {
+            this.moveDisplayRangeBackward();
+
+            this.suggestionContainer.lastChild?.remove();
+            const newSuggestion = this.addSuggestionFirst(this.currentSuggestions[this.displayInfo.start]);
+            return newSuggestion;
+        }
+        
+        // TODO: enter the math field
+        return null;
+    }
+
+    /**
+     * Show the next, hidden suggestion. This assumes the currently selected suggestion is the last shown.
+     * @returns The previously hidden suggestion, if there were any.
+     */
+    private showNextHiddenSuggestion(): HTMLDivElement | null {
+
+        // Check a next suggestion exists
+        if (this.currentSuggestions.length > this.displayInfo.end + 1) {
+            this.moveDisplayRangeForward();
+
+            this.suggestionContainer.firstChild?.remove();
+            const newSuggestion = this.addSuggestionLast(this.currentSuggestions[this.displayInfo.end]);
+            return newSuggestion;
+        }
+
+        return null;
+    }
+
+    /**
+     * Move the selection to the next suggestion. In the case that `suggestion` is the last visible suggestion, 
+     * also update to display the next suggestion and hide the first suggestion.  
+     * @param suggestion The currently selected suggestion element. 
+     */
     private selectNextSuggestion(suggestion: HTMLDivElement) {
         const next = suggestion.nextElementSibling;
         
         if (next !== null) {
             (next as HTMLDivElement).focus();
+        } else {
+            this.showNextHiddenSuggestion()?.focus();
         }
     }
 
@@ -196,6 +295,8 @@ export class suggestionTab {
         
         if (next !== null) {
             (next as HTMLDivElement).focus();
+        } else {
+            this.showPreviousHiddenSuggestion()?.focus();
         }
     }
 

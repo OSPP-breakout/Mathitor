@@ -1,4 +1,6 @@
+import { suggestionTab } from "../autoComplete/autocomplete";
 import { textArea } from "../text_mode";
+
 import * as Caret from "./caret";
 // Math mode global constants
 
@@ -8,11 +10,12 @@ export let mathMode = false;
 
 let amountOfMQFields = 0;
 let mathFieldArray: Array<any> = [];
-
-
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
-// Math mode functions
+const suggestionsTab = new suggestionTab();
+const closeSuggestions = () => {
+    suggestionsTab.close();
+}
 
 export function createMathField(): void {
     if (mathMode) return;
@@ -27,9 +30,12 @@ export function createMathField(): void {
         handlers: {
             edit: function () {
                 latexSpan.textContent = mathField.latex();
+                suggestionsTab.open(mathField);
             },
             moveOutOf: function (direction: any, mathfield: any) {
+                closeSuggestions();
                 mathfield.blur();
+
                 let range = document.createRange();
                 const caretPosition = document.getSelection();
                 const mathFieldNode = mathfield.el() as Node;
@@ -57,8 +63,13 @@ export function createMathField(): void {
                 caretPos?.removeAllRanges();
                 caretPos?.addRange(range);
             },
-        },
+            selectOutOf: function (direction: any, mathfield: any) {
+                closeSuggestions();
+            }
+        }
     });
+
+    //mathField.el().querySelector('textarea').addEventListener('focusout', closeSuggestions);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
