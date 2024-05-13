@@ -1,3 +1,4 @@
+import * as FileManagement from './file_management_frontend';
 import * as ModeMode from './mathMode/math_mode';
 import * as MathModeCaret from './mathMode/caret';
 import * as TextMode from './text_mode';
@@ -30,7 +31,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'button-MQ', action: 'click', callback: ModeMode.createMathField },
     { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
     { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
-    { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full }
+    { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
+    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
 ];
 
 export function add_listeners() {

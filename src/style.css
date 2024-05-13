@@ -136,3 +136,12 @@ body {
 #show-code[data-active="true"] {
     background: #eee;
 }
+
+.editor
+{
+    border:solid 1px #ccc;
+    padding: 20px;
+    min-height:200px;
+    font: sans-serif;
+    resize: vertical;
+}
