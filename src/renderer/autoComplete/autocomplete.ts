@@ -1,4 +1,6 @@
-// TODO: make a pretty interface
+// TODO: make suggestions clickable (this may already work).
+// TODO: make it possible to complete the text. 
+// TODO: add CSS style
 // TODO: fix bug where interface is still shown after deleting math field
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
@@ -75,11 +77,24 @@ export class suggestionTab {
         return !this.openStatus;
     }
 
+    focus() {
+        const firstSuggestion = this.suggestionContainer.firstChild;
+        console.log(firstSuggestion);
+
+        if (firstSuggestion !== null) {
+            (firstSuggestion as HTMLDivElement).focus();
+        }
+    }
+
+    blur() {
+       this.currentMathField.focus(); 
+    }
+
     /**
      * Complete the word that is being written within the MathQuill math field with the currently selected suggestion. 
      */
     private complete() {
-        this.currentMathField.focus();
+        this.blur();
     }
 
     /**
@@ -189,7 +204,7 @@ export class suggestionTab {
         this.suggestionContainer.prepend(option);
         
         option.textContent = suggestion.alias;
-        option.setAttribute("actualValue", suggestion.actual);
+        option.setAttribute("suggestionValue", suggestion.actual);
         option.tabIndex = 0;
         
         this.addSuggestionListeners(option);
@@ -205,7 +220,7 @@ export class suggestionTab {
         this.suggestionContainer.append(option);
         
         option.textContent = suggestion.alias;
-        option.setAttribute("actualValue", suggestion.actual);
+        option.setAttribute("suggestionValue", suggestion.actual);
         option.tabIndex = 0;
         
         this.addSuggestionListeners(option);
@@ -217,15 +232,26 @@ export class suggestionTab {
     }
 
     private suggestionBlur(e: any) {
-        
+        const newFocus = e.relatedTarget as HTMLElement;
+
+        if (newFocus?.hasAttribute("suggestionValue") === false) {
+            if (newFocus?.parentElement?.parentElement?.id !== this.currentMathField.el().id) {
+                this.close();
+            } 
+        } 
     }
 
     private suggestionClick(e: any) {
-        console.log("clicky");
+        this.currentMathField.blur();
+        this.focus();
+        console.log("clicked it!")
     }
 
     private suggestionKeyDown(e: any) {
         switch(e.key) {
+            case "Escape": 
+                this.blur();
+                break;
             case "Enter": 
                 this.complete();
                 break;
@@ -253,7 +279,7 @@ export class suggestionTab {
             return newSuggestion;
         }
         
-        // TODO: enter the math field
+        this.blur();
         return null;
     }
 
@@ -301,9 +327,8 @@ export class suggestionTab {
     }
 
     private addSuggestionListeners(suggestionElement: HTMLDivElement) {
-        this.addListener(suggestionElement, "focus", this.suggestionFocus);
         this.addListener(suggestionElement, "blur", (e: any) => { this.suggestionBlur(e)});
-        this.addListener(suggestionElement, "click", this.suggestionClick);
+        this.addListener(suggestionElement, "click", (e: any) => { this.suggestionClick(e)});
         this.addListener(suggestionElement, "keydown", (e: any) => {this.suggestionKeyDown(e)});
     }
 

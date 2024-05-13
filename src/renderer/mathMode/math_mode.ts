@@ -17,6 +17,20 @@ const closeSuggestions = () => {
     suggestionsTab.close();
 }
 
+const closeMathField = (e: any) => {
+    const focusedOn = e.relatedTarget;
+    
+    if (focusedOn === null || focusedOn == undefined) {
+
+    } else if (!(focusedOn as HTMLElement).hasAttribute("suggestionValue")) {
+        closeSuggestions();
+    }
+}
+
+const focusSuggestions = () => {
+    suggestionsTab.focus();
+}
+
 export function createMathField(): void {
     if (mathMode) return;
     amountOfMQFields++;
@@ -28,7 +42,7 @@ export function createMathField(): void {
     // Link the new MQ-field to the latex-preview
     var mathField = MQ.MathField(MQField, {
         handlers: {
-            edit: function () {
+            edit: () => {
                 latexSpan.textContent = mathField.latex();
                 suggestionsTab.open(mathField);
             },
@@ -49,7 +63,10 @@ export function createMathField(): void {
                 console.log(window.getSelection()?.getRangeAt(0))
                 mathMode = false;
             },
-            deleteOutOf: function(dir: number, mathfield: any) {
+            downOutOf: () => {
+                focusSuggestions();
+            },
+            deleteOutOf: (dir: number, mathfield: any) => {
                 mathMode = false;
                 mathfield.blur();
                 let range = document.createRange();
@@ -62,14 +79,11 @@ export function createMathField(): void {
                 }
                 caretPos?.removeAllRanges();
                 caretPos?.addRange(range);
-            },
-            selectOutOf: function (direction: any, mathfield: any) {
-                closeSuggestions();
             }
         }
     });
 
-    //mathField.el().querySelector('textarea').addEventListener('focusout', closeSuggestions);
+    mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
