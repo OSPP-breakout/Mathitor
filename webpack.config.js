@@ -7,7 +7,8 @@ module.exports = {
     target: 'electron-main',
     entry: {
         index: './src/index.ts',
-        renderer: './src/renderer/renderer.ts'
+        renderer: './src/renderer/renderer.ts',
+        file_management_preload: './src/file_management_backend/file_management_preload.ts'
     },
     devServer: {
         static: './dist'
