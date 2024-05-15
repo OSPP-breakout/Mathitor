@@ -1,6 +1,5 @@
-// TODO: make suggestions clickable (this may already work).
-// TODO: add CSS style
 // TODO: fix bug where interface is still shown after deleting math field
+// TODO: fix completion function
 // TODO: (if possible) Do not show suggestion tab within subscript or superscript elements.
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
@@ -23,10 +22,12 @@ export class suggestionTab {
     private openStatus: boolean;
     private displayInfo: suggestionRange;
     private wordBeingWritten: string;
+    private editEventInterrupted: boolean;
 
     constructor() {
         this.displayInfo = {maxRangeSize: 5, start: 0, end: 0};
         this.openStatus = false;
+        this.editEventInterrupted = false;
         this.possibleSuggestions = [
             {alias: "integral", actual: "integral"},
             {alias: "summation", actual: "summation"},
@@ -42,15 +43,46 @@ export class suggestionTab {
         documentContainer?.appendChild(this.suggestionContainer);
     }
 
+    private markCaret(): string {
+        // Get unmodified latex
+        // Insert sentinel character within math field
+        // Reset math field to previous, unmodified state.
+        // Retrieve first occurrence of sentinel character and return string before it.
+
+        this.editEventInterrupted = true;
+
+        this.currentMathField.write("🔥");
+        const markedString = this.currentMathField.latex();
+        this.currentMathField.keystroke("Backspace");
+        this.currentMathField.keystroke("Backspace");
+        
+        this.editEventInterrupted = false;
+        return markedString
+    }
+
+    private getStringBeforeCaret(markedString: string): string {
+        const markedIndex = markedString.search("🔥");
+        return markedString.substring(0, markedIndex);
+    }
+
     /**
      * Display the suggestion tab with suggestions based on the word that is being written within `mathField`. 
      * @param mathField A MathQuill mathField.
      */
     open(mathField: any) {
+        if (this.editEventInterrupted == true) {
+            return;
+        }
+
         this.openStatus = true;
         this.currentMathField = mathField;
-        const mathFormula: string = this.currentMathField.latex();
-    
+        this.update();
+    }
+
+
+    update() {
+        const mathFormula = this.getStringBeforeCaret(this.markCaret());
+        
         this.updateCurrentSuggestions(mathFormula);
         this.updatePlacement();
         this.displaySuggestions();
@@ -74,7 +106,6 @@ export class suggestionTab {
 
     focus() {
         const firstSuggestion = this.suggestionContainer.firstChild;
-        console.log(firstSuggestion);
 
         if (firstSuggestion !== null) {
             (firstSuggestion as HTMLDivElement).focus();
@@ -148,6 +179,7 @@ export class suggestionTab {
      * @param mathFieldInput 
      */
     private getWordBeingWritten(mathFieldInput: string) {
+        // TODO: check the string before the caret
         const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
     
         let i = mathFieldInput.length - 1;
@@ -181,16 +213,22 @@ export class suggestionTab {
         this.displayInfo.end = currentEnd - 1;
     }
 
+    private setDefaultSuggestionStyle(element: HTMLDivElement) {
+        const property = element.style;
+        property.background = "rgb(255, 255, 255)";
+    }
+
     /**
      * Adds a new suggestion to the suggestion tab.
      * @param suggestion The display name of the suggestion and its value.
      */
     private addSuggestionFirst(suggestion: suggestionEntry): HTMLDivElement {
-        const option = document.createElement("div");
+        const option: HTMLDivElement = document.createElement("div");
         this.suggestionContainer.prepend(option);
         
         option.textContent = suggestion.alias;
         option.setAttribute("suggestionValue", suggestion.actual);
+        this.setDefaultSuggestionStyle(option);
         option.tabIndex = 0;
         
         this.addSuggestionListeners(option);
@@ -202,11 +240,12 @@ export class suggestionTab {
      * @param suggestion The display name of the suggestion and its value.
      */
     private addSuggestionLast(suggestion: suggestionEntry): HTMLDivElement {
-        const option = document.createElement("div");
+        const option: HTMLDivElement = document.createElement("div");
         this.suggestionContainer.append(option);
         
         option.textContent = suggestion.alias;
         option.setAttribute("suggestionValue", suggestion.actual);
+        this.setDefaultSuggestionStyle(option);
         option.tabIndex = 0;
         
         this.addSuggestionListeners(option);
@@ -224,13 +263,13 @@ export class suggestionTab {
         const withoutWordToComplete = mathFormula.substring(0, mathFormula.length - this.wordBeingWritten.length);
 
         this.currentMathField.select();
-        console.log(mathFormula + "\\" + toCompleteWith);
-        console.log(mathFormula);
-        console.log(withoutWordToComplete);
         this.currentMathField.write(withoutWordToComplete + "\\" + toCompleteWith);
     }
 
     private suggestionBlur(e: any) {
+        const element: HTMLDivElement = e.target;
+        element.style.background = "rgb(255, 255, 255)";
+
         const newFocus = e.relatedTarget as HTMLElement;
 
         if (newFocus?.hasAttribute("suggestionValue") === false) {
@@ -240,10 +279,14 @@ export class suggestionTab {
         } 
     }
 
+    private suggestionFocus(e: any) {
+        const element: HTMLDivElement = e.target;
+        element.style.background = "rgb(200, 200, 200)";
+    }
+
     private suggestionClick(e: any) {
         this.currentMathField.blur();
-        this.focus();
-        console.log("clicked it!")
+        e.target.focus();
     }
 
     private suggestionKeyDown(e: any) {
@@ -327,6 +370,7 @@ export class suggestionTab {
 
     private addSuggestionListeners(suggestionElement: HTMLDivElement) {
         this.addListener(suggestionElement, "blur", (e: any) => { this.suggestionBlur(e)});
+        this.addListener(suggestionElement, "focus", (e: any) => { this.suggestionFocus(e)});
         this.addListener(suggestionElement, "click", (e: any) => { this.suggestionClick(e)});
         this.addListener(suggestionElement, "keydown", (e: any) => {this.suggestionKeyDown(e)});
     }
@@ -342,16 +386,3 @@ export class suggestionTab {
         );
     }
 }
-
-// function autoCompleteWord(mathField: any, toCompleteWith: string) {
-//     const mathFormula: string = mathField.latex();
-//     const status = canAutoComplete(mathFormula, toCompleteWith);
-
-//     if (status.autoCompletable === true) {
-//         const end = mathFormula.length;
-//         const withoutMatches = mathFormula.substring(0, end - status.matchingCharacters);
-        
-//         mathField.select();
-//         mathField.write(withoutMatches + "\\" + toCompleteWith);
-//     }
-// }

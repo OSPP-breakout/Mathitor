@@ -31,6 +31,21 @@ const focusSuggestions = () => {
     suggestionsTab.focus();
 }
 
+const keydownSuggestions = (e: any) => {
+    function isArrowMovement(key: string): boolean {
+        return key === "ArrowLeft" || key === "ArrowRight" ||
+               key === "ArrowDown" || key === "ArrowUp"
+    }
+
+    if (isArrowMovement(e.key)) {
+        suggestionsTab.update();
+    }
+}
+
+const clickSuggestions = (e: any) => {
+    suggestionsTab.update();
+}
+
 export function createMathField(): void {
     if (mathMode) return;
     amountOfMQFields++;
@@ -42,9 +57,9 @@ export function createMathField(): void {
     // Link the new MQ-field to the latex-preview
     var mathField = MQ.MathField(MQField, {
         handlers: {
-            edit: () => {
-                latexSpan.textContent = mathField.latex();
-                suggestionsTab.open(mathField);
+            edit: (mathfield: any) => {
+                latexSpan.textContent = mathfield.latex();
+                suggestionsTab.open(mathfield);
             },
             moveOutOf: function (direction: any, mathfield: any) {
                 closeSuggestions();
@@ -84,6 +99,8 @@ export function createMathField(): void {
     });
 
     mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
+    mathField.el().addEventListener('keyup', keydownSuggestions);
+    mathField.el().addEventListener('mousedown', clickSuggestions);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
