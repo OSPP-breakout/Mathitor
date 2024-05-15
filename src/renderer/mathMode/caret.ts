@@ -31,7 +31,6 @@ export function handleCursor(e: any) {
                 handleDelete(caretPos);
                 break;
             default:
-                //console.log(e.key)
                 return;
         }
     }
@@ -145,9 +144,7 @@ function handleRightArrow(caretPos: Selection) {
     const nextSibling = findSiblingToParentRight(caretPos.focusNode as Node);
     let mathFieldElem = findChildMathFieldLeft(nextSibling as Node);
     const nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number);
-    console.log("Next element: " + nextSibling?.nodeName + " Caret Pos: " + caretOffset + " Caret at: " + caretPos.focusNode?.textContent);
-    console.log("Next child elem: " + mathFieldElem?.nodeName);
-    console.log("");
+
     if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
         MathMode.activateMathField(nextSibling as Node, Direction.Right);
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
@@ -163,7 +160,6 @@ function handleBackSpace(caretPos: Selection) {
         || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
             MathMode.activateMathField(prevSibling as Node, Direction.Left);
     } else if (!mathMode && caretOffset === 1 && caretPos.focusNode?.textContent?.length === 1) {
-        console.log("Prev sibling: " + prevSibling?.nodeName)
         caretPos.focusNode.textContent = "\u00A0";  
         MathMode.activateMathField(prevSibling as Node, Direction.Left);
     }

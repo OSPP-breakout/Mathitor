@@ -32,6 +32,13 @@ const focusSuggestions = () => {
 }
 
 const keydownSuggestions = (e: any) => {
+    if (suggestionsTab.hasSuggestions() === true && e.key === "ArrowDown") {
+        console.log("triggered!");
+        suggestionsTab.focus();
+    }
+}
+
+const keyupSuggestions = (e: any) => {
     function isArrowMovement(key: string): boolean {
         return key === "ArrowLeft" || key === "ArrowRight" ||
                key === "ArrowDown" || key === "ArrowUp"
@@ -75,7 +82,6 @@ export function createMathField(): void {
                 }
                 caretPosition?.removeAllRanges();
                 caretPosition?.addRange(range);
-                console.log(window.getSelection()?.getRangeAt(0))
                 mathMode = false;
             },
             downOutOf: () => {
@@ -99,7 +105,8 @@ export function createMathField(): void {
     });
 
     mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
-    mathField.el().addEventListener('keyup', keydownSuggestions);
+    mathField.el().addEventListener('keyup', keyupSuggestions);
+    mathField.el().addEventListener('keydown', keydownSuggestions);
     mathField.el().addEventListener('mousedown', clickSuggestions);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});

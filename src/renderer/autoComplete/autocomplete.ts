@@ -1,6 +1,5 @@
 // TODO: fix bug where interface is still shown after deleting math field
 // TODO: fix completion function
-// TODO: (if possible) Do not show suggestion tab within subscript or superscript elements.
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
 
 interface suggestionEntry {
@@ -17,25 +16,26 @@ interface suggestionRange {
 export class suggestionTab {
     private suggestionContainer: HTMLElement;
     private possibleSuggestions: Array<suggestionEntry>;
-    private currentSuggestions: Array<suggestionEntry>;
+    
     private currentMathField: any;
-    private openStatus: boolean;
+    private currentSuggestions: Array<suggestionEntry>;
     private displayInfo: suggestionRange;
     private wordBeingWritten: string;
+    private caretIndex: number;
+
     private editEventInterrupted: boolean;
 
     constructor() {
         this.displayInfo = {maxRangeSize: 5, start: 0, end: 0};
-        this.openStatus = false;
         this.editEventInterrupted = false;
         this.possibleSuggestions = [
-            {alias: "integral", actual: "integral"},
-            {alias: "summation", actual: "summation"},
-            {alias: "product", actual: "product"},
-            {alias: "pq-formula", actual: ""}
+            {alias: "integral", actual: "\\integral"},
+            {alias: "summation", actual: "\\summation"},
+            {alias: "product", actual: "\\product"},
         ];
         this.currentSuggestions = this.possibleSuggestions;
         this.wordBeingWritten = "";
+        this.caretIndex = 0;
 
         const documentContainer = document.querySelector(".container");
         this.suggestionContainer = document.createElement("div");
@@ -43,44 +43,32 @@ export class suggestionTab {
         documentContainer?.appendChild(this.suggestionContainer);
     }
 
-    private markCaret(): string {
-        // Get unmodified latex
-        // Insert sentinel character within math field
-        // Reset math field to previous, unmodified state.
-        // Retrieve first occurrence of sentinel character and return string before it.
-
-        this.editEventInterrupted = true;
-
-        this.currentMathField.write("🔥");
-        const markedString = this.currentMathField.latex();
-        this.currentMathField.keystroke("Backspace");
-        this.currentMathField.keystroke("Backspace");
-        
-        this.editEventInterrupted = false;
-        return markedString
-    }
-
-    private getStringBeforeCaret(markedString: string): string {
-        const markedIndex = markedString.search("🔥");
-        return markedString.substring(0, markedIndex);
-    }
-
     /**
      * Display the suggestion tab with suggestions based on the word that is being written within `mathField`. 
      * @param mathField A MathQuill mathField.
      */
     open(mathField: any) {
+        // TODO: rename method
         if (this.editEventInterrupted == true) {
             return;
         }
 
-        this.openStatus = true;
         this.currentMathField = mathField;
         this.update();
     }
 
+    /**
+     * Close the suggestion tab. Nothing happens if this is called when the suggestion tab is closed.
+     */
+    close() {
+        this.clearSuggestions();
+    }
 
     update() {
+        if (this.currentMathField === undefined) {
+            return;
+        }
+        
         const mathFormula = this.getStringBeforeCaret(this.markCaret());
         
         this.updateCurrentSuggestions(mathFormula);
@@ -88,22 +76,22 @@ export class suggestionTab {
         this.displaySuggestions();
     }
 
+    hasSuggestions(): boolean {
+        return this.currentSuggestions.length > 0;
+    }
+
     /**
-     * Close the suggestion tab. Nothing happens if this is called when the suggestion tab is closed.
+     * Enter the suggestion tab and move the caret within the math field up one step. 
      */
-    close() {
-        this.openStatus = false;
-        this.clearSuggestions();
+    focusDown() {
+        this.currentMathField.keystroke("Left");
+        this.update();
+        this.focus();
     }
 
-    isOpen(): boolean {
-        return this.openStatus;
-    }
-
-    isClosed(): boolean {
-        return !this.openStatus;
-    }
-
+    /**
+     * Enter the suggestion tab.
+     */
     focus() {
         const firstSuggestion = this.suggestionContainer.firstChild;
 
@@ -129,7 +117,6 @@ export class suggestionTab {
     }
 
     private displaySuggestions() {
-        this.openStatus = true;
         this.clearSuggestions();
 
         const limit = this.currentSuggestions.length < this.displayInfo.maxRangeSize ? this.currentSuggestions.length : this.displayInfo.maxRangeSize;
@@ -142,8 +129,12 @@ export class suggestionTab {
 
     private updateCurrentSuggestions(mathFieldInput: string) {
         this.getWordBeingWritten(mathFieldInput);
+        if (this.wordBeingWritten.length === 0) {
+            this.currentSuggestions = [];
+            return;
+        }
+        
         let suggestions: Array<suggestionEntry> = [];
-    
         this.possibleSuggestions.forEach(keyword => {
             if (keyword.alias.startsWith(this.wordBeingWritten)) {
                 suggestions.push(keyword);
@@ -173,13 +164,30 @@ export class suggestionTab {
         this.suggestionContainer.style.left = leftOffset;
     }
 
+    private markCaret(): string {
+        this.editEventInterrupted = true;
+
+        this.currentMathField.write("🔥");
+        const markedString = this.currentMathField.latex();
+        this.currentMathField.keystroke("Backspace");
+        this.currentMathField.keystroke("Backspace");
+        
+        this.editEventInterrupted = false;
+        return markedString
+    }
+
+    private getStringBeforeCaret(markedString: string): string {
+        const markedIndex = markedString.indexOf("🔥");
+        this.caretIndex = markedIndex;
+        return markedString.substring(0, markedIndex);
+    }
+
     /**
      * Update the word currently being written in a math field given the LaTeX output of the field.
      * Note this only checks for input being written at the end of the mathfield.
      * @param mathFieldInput 
      */
     private getWordBeingWritten(mathFieldInput: string) {
-        // TODO: check the string before the caret
         const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
     
         let i = mathFieldInput.length - 1;
@@ -255,15 +263,25 @@ export class suggestionTab {
     /**
      * Complete the word that is being written within the MathQuill math field with the currently selected suggestion. 
      */
-    private suggestionComplete(suggestion: HTMLDivElement) {
-        const toCompleteWith = suggestion.getAttribute("suggestionValue");
+    private complete(suggestion: HTMLDivElement) {
+        // 1. retrieve selected suggestion
+        // 2. blur
+        // 3. retrieve string before caret - word being written
+        // 4. retrieve string after caret
+        // 5. concatinate string from 3. with suggestion and string from 4.
+        // 6. Write to math field
+
+        const completion = suggestion.getAttribute("suggestionValue");
         this.blur();
 
-        const mathFormula: string = this.currentMathField.latex();
-        const withoutWordToComplete = mathFormula.substring(0, mathFormula.length - this.wordBeingWritten.length);
+        const mathFieldInput: string = this.currentMathField.latex();
+        const beforeCaret = mathFieldInput.substring(0, this.caretIndex - this.wordBeingWritten.length);
+        const afterCaret = mathFieldInput.substring(this.caretIndex, mathFieldInput.length);
+        console.log("Before: " + beforeCaret);
+        console.log("After: " + afterCaret);
 
         this.currentMathField.select();
-        this.currentMathField.write(withoutWordToComplete + "\\" + toCompleteWith);
+        this.currentMathField.write(beforeCaret + completion + afterCaret);
     }
 
     private suggestionBlur(e: any) {
@@ -295,7 +313,7 @@ export class suggestionTab {
                 this.blur();
                 break;
             case "Enter": 
-                this.suggestionComplete(e.target);
+                this.complete(e.target);
                 break;
             case "ArrowDown": 
                 this.selectNextSuggestion(e.target);
