@@ -1,4 +1,4 @@
-import { suggestionTab } from "../autoComplete/autocomplete";
+import { suggestionTab } from "../suggestionTab/suggestionTab";
 import { textArea } from "../text_mode";
 
 import * as Caret from "./caret";

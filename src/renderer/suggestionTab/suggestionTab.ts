@@ -1,6 +1,5 @@
-// TODO: fix bug where interface is still shown after deleting math field
-// TODO: fix completion function
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
+// TODO: load possible suggestions from a JSON file.
 
 interface suggestionEntry {
     alias: string,
@@ -25,11 +24,18 @@ export class suggestionTab {
 
     private editEventInterrupted: boolean;
 
-    constructor() {
-        this.displayInfo = {maxRangeSize: 5, start: 0, end: 0};
+    constructor(maxDisplayed: number = 5) {
+        this.displayInfo = {maxRangeSize: maxDisplayed, start: 0, end: 0};
         this.editEventInterrupted = false;
         this.possibleSuggestions = [
             {alias: "integral", actual: "\\integral"},
+            {alias: "p1", actual: "\\integral"},
+            {alias: "p2", actual: "\\integral"},
+            {alias: "p3", actual: "\\integral"},
+            {alias: "p4", actual: "\\integral"},
+            {alias: "p5", actual: "\\integral"},
+            {alias: "p6", actual: "\\integral"},
+            {alias: "p7", actual: "\\integral"},
             {alias: "summation", actual: "\\summation"},
             {alias: "product", actual: "\\product"},
         ];
@@ -44,11 +50,11 @@ export class suggestionTab {
     }
 
     /**
-     * Display the suggestion tab with suggestions based on the word that is being written within `mathField`. 
+     * Display the suggestion tab with suggestions based on the word that is being written within `mathField`. Attaches
+     * `math field` to the suggestion tab. All operations which depend on a math field will use the field passed to this method. 
      * @param mathField A MathQuill mathField.
      */
     open(mathField: any) {
-        // TODO: rename method
         if (this.editEventInterrupted == true) {
             return;
         }
@@ -64,33 +70,9 @@ export class suggestionTab {
         this.clearSuggestions();
     }
 
-    update() {
-        if (this.currentMathField === undefined) {
-            return;
-        }
-        
-        const mathFormula = this.getStringBeforeCaret(this.markCaret());
-        
-        this.updateCurrentSuggestions(mathFormula);
-        this.updatePlacement();
-        this.displaySuggestions();
-    }
-
-    hasSuggestions(): boolean {
-        return this.currentSuggestions.length > 0;
-    }
-
     /**
-     * Enter the suggestion tab and move the caret within the math field up one step. 
-     */
-    focusDown() {
-        this.currentMathField.keystroke("Left");
-        this.update();
-        this.focus();
-    }
-
-    /**
-     * Enter the suggestion tab.
+     * Makes the first suggestion focused. In essence, this means that the suggestion tab is
+     * entered.
      */
     focus() {
         const firstSuggestion = this.suggestionContainer.firstChild;
@@ -100,8 +82,33 @@ export class suggestionTab {
         }
     }
 
+    /**
+     * Set the focus on the math field related to the suggestion tab. This should be used when exiting
+     * the suggestion tab.
+     */
     blur() {
        this.currentMathField.focus(); 
+    }
+
+    /**
+     * Updates suggestions within the tab.
+     */
+    update() {
+        if (this.currentMathField === undefined) {
+            return;
+        }
+        
+        this.updateCurrentSuggestions();
+        this.updatePlacement();
+        this.displaySuggestions();
+    }
+
+    /**
+     * Check if the suggestion tab has any suggestions.
+     * @returns True if the suggestion tab has any suggestions.
+     */
+    hasSuggestions(): boolean {
+        return this.currentSuggestions.length > 0;
     }
 
     /**
@@ -116,6 +123,9 @@ export class suggestionTab {
         }
     }
 
+    /**
+     * Add div elements representing the current suggestions.
+     */
     private displaySuggestions() {
         this.clearSuggestions();
 
@@ -127,8 +137,12 @@ export class suggestionTab {
         this.displayInfo.end = limit - 1;
     }
 
-    private updateCurrentSuggestions(mathFieldInput: string) {
-        this.getWordBeingWritten(mathFieldInput);
+    /**
+     * Update the current suggestions based on what is written within the math field
+     * that was in focus last. 
+     */
+    private updateCurrentSuggestions() {
+        this.getCurrentWord();
         if (this.wordBeingWritten.length === 0) {
             this.currentSuggestions = [];
             return;
@@ -148,13 +162,9 @@ export class suggestionTab {
      * Update the absolute position of the component.
      */
     private updatePlacement() {
-        // TODO: refactor function and make it aware of different screen sizes and font sizes 
-        // (may be needed)
         this.currentMathField.focus();
         let offset = this.currentMathField.__controller.cursor.offset();
-        if (offset === null) {
-            offset = { 'top': 0, 'left': 0 }
-        }
+        offset = offset === null ? { 'top': 0, 'left': 0 } : offset;
         
         const offsetFix = 20;
         const topOffset = ((offset.top + offsetFix) as Number).toFixed() + "px";
@@ -164,6 +174,10 @@ export class suggestionTab {
         this.suggestionContainer.style.left = leftOffset;
     }
 
+    /**
+     * Mark the position of the caret within the latex string represented by attached math field.
+     * @returns A string with a marker which points to the current position of the caret (text cursor).
+     */
     private markCaret(): string {
         this.editEventInterrupted = true;
 
@@ -175,7 +189,13 @@ export class suggestionTab {
         return markedString
     }
 
-    private getStringBeforeCaret(markedString: string): string {
+    /**
+     * Update the index of the caret (text cursor) within the latex code retrieved from the
+     * attached math field.
+     * @returns The part of the latex code before the cursor.
+     */
+    private updateCaretIndex(): string {
+        const markedString = this.markCaret()
         const markedIndex = markedString.indexOf("\uFFFF");
         this.caretIndex = markedIndex;
         return markedString.substring(0, markedIndex);
@@ -183,13 +203,12 @@ export class suggestionTab {
 
     /**
      * Update the word currently being written in a math field given the LaTeX output of the field.
-     * Note this only checks for input being written at the end of the mathfield.
-     * @param mathFieldInput 
      */
-    private getWordBeingWritten(mathFieldInput: string) {
+    private getCurrentWord() {
+        const mathFieldInput = this.updateCaretIndex();
         const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
-    
         let i = mathFieldInput.length - 1;
+
         while ((i >= 0) && !delimiters.includes(mathFieldInput[i])) {
             --i;
         }
@@ -198,12 +217,18 @@ export class suggestionTab {
             ? ""
             : mathFieldInput.substring(i + 1, mathFieldInput.length).toLowerCase();
     }
-    
+
+    /**
+     * Reset the range of suggestions being displayed. 
+     */
     private clearDisplayRange() {
         this.displayInfo.start = 0;
         this.displayInfo.end = 0;
     }
 
+    /**
+     * Moves the range of displayed suggestions forward by one.
+     */
     private moveDisplayRangeForward() {
         const currentStart = this.displayInfo.start;
         const currentEnd = this.displayInfo.end;
@@ -212,6 +237,9 @@ export class suggestionTab {
         this.displayInfo.end = currentEnd + 1;
     } 
 
+    /**
+     * Moves the range of displayed suggestions backward by one.
+     */
     private moveDisplayRangeBackward() {
         const currentStart = this.displayInfo.start;
         const currentEnd = this.displayInfo.end;
@@ -225,13 +253,8 @@ export class suggestionTab {
         property.background = "rgb(255, 255, 255)";
     }
 
-    /**
-     * Adds a new suggestion to the suggestion tab.
-     * @param suggestion The display name of the suggestion and its value.
-     */
-    private addSuggestionFirst(suggestion: suggestionEntry): HTMLDivElement {
+    private createSuggestionElement(suggestion: suggestionEntry): HTMLDivElement {
         const option: HTMLDivElement = document.createElement("div");
-        this.suggestionContainer.prepend(option);
         
         option.textContent = suggestion.alias;
         option.setAttribute("suggestionValue", suggestion.actual);
@@ -240,6 +263,16 @@ export class suggestionTab {
         
         this.addSuggestionListeners(option);
         return option;
+    } 
+
+    /**
+     * Adds a new suggestion to the suggestion tab.
+     * @param suggestion The display name of the suggestion and its value.
+     */
+    private addSuggestionFirst(suggestion: suggestionEntry): HTMLDivElement {
+        const element = this.createSuggestionElement(suggestion);
+        this.suggestionContainer.prepend(element);
+        return element;
     }
 
     /**
@@ -247,16 +280,9 @@ export class suggestionTab {
      * @param suggestion The display name of the suggestion and its value.
      */
     private addSuggestionLast(suggestion: suggestionEntry): HTMLDivElement {
-        const option: HTMLDivElement = document.createElement("div");
-        this.suggestionContainer.append(option);
-        
-        option.textContent = suggestion.alias;
-        option.setAttribute("suggestionValue", suggestion.actual);
-        this.setDefaultSuggestionStyle(option);
-        option.tabIndex = 0;
-        
-        this.addSuggestionListeners(option);
-        return option;
+        const element = this.createSuggestionElement(suggestion);
+        this.suggestionContainer.append(element);
+        return element;
     }
 
     /**
@@ -273,7 +299,7 @@ export class suggestionTab {
         this.currentMathField.select();
         this.currentMathField.write(beforeCaret + completion + afterCaret);
     }
-
+    
     private suggestionBlur(e: any) {
         const element: HTMLDivElement = e.target;
         element.style.background = "rgb(255, 255, 255)";
@@ -319,8 +345,6 @@ export class suggestionTab {
      * @returns The previously hidden suggestion, if there were any.
      */
     private showPreviousHiddenSuggestion(): HTMLDivElement | null {
-        // Update the visible suggestion range
-
         if (this.displayInfo.start > 0) {
             this.moveDisplayRangeBackward();
 
@@ -338,8 +362,7 @@ export class suggestionTab {
      * @returns The previously hidden suggestion, if there were any.
      */
     private showNextHiddenSuggestion(): HTMLDivElement | null {
-
-        // Check a next suggestion exists
+        // Check if a previous suggestion which is hidden exists.
         if (this.currentSuggestions.length > this.displayInfo.end + 1) {
             this.moveDisplayRangeForward();
 
@@ -366,6 +389,12 @@ export class suggestionTab {
         }
     }
 
+    /**
+     * Move the selection to the previous suggestion. In the case that `suggestion` is the last visible suggestion, 
+     * also update to display the previous, hidden suggestion and hide the last suggestion displayed. If no hidden 
+     * suggestion exists, the attached math field will be entered.
+     * @param suggestion The currently suggestion element. 
+     */
     private selectPreviousSuggestion(suggestion: HTMLDivElement) {
         const next = suggestion.previousElementSibling;
         
