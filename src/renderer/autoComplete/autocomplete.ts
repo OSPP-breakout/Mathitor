@@ -167,9 +167,8 @@ export class suggestionTab {
     private markCaret(): string {
         this.editEventInterrupted = true;
 
-        this.currentMathField.write("🔥");
+        this.currentMathField.write("\uFFFF");
         const markedString = this.currentMathField.latex();
-        this.currentMathField.keystroke("Backspace");
         this.currentMathField.keystroke("Backspace");
         
         this.editEventInterrupted = false;
@@ -177,7 +176,7 @@ export class suggestionTab {
     }
 
     private getStringBeforeCaret(markedString: string): string {
-        const markedIndex = markedString.indexOf("🔥");
+        const markedIndex = markedString.indexOf("\uFFFF");
         this.caretIndex = markedIndex;
         return markedString.substring(0, markedIndex);
     }
@@ -264,21 +263,12 @@ export class suggestionTab {
      * Complete the word that is being written within the MathQuill math field with the currently selected suggestion. 
      */
     private complete(suggestion: HTMLDivElement) {
-        // 1. retrieve selected suggestion
-        // 2. blur
-        // 3. retrieve string before caret - word being written
-        // 4. retrieve string after caret
-        // 5. concatinate string from 3. with suggestion and string from 4.
-        // 6. Write to math field
-
         const completion = suggestion.getAttribute("suggestionValue");
         this.blur();
 
         const mathFieldInput: string = this.currentMathField.latex();
         const beforeCaret = mathFieldInput.substring(0, this.caretIndex - this.wordBeingWritten.length);
         const afterCaret = mathFieldInput.substring(this.caretIndex, mathFieldInput.length);
-        console.log("Before: " + beforeCaret);
-        console.log("After: " + afterCaret);
 
         this.currentMathField.select();
         this.currentMathField.write(beforeCaret + completion + afterCaret);
