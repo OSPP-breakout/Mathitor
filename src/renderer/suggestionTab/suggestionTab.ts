@@ -17,16 +17,15 @@ export class suggestionTab {
     private possibleSuggestions: Array<suggestionEntry>;
     
     private currentMathField: any;
-    private currentSuggestions: Array<suggestionEntry>;
+    private currentSuggestions: Array<suggestionEntry> = [];
     private displayInfo: suggestionRange;
-    private wordBeingWritten: string;
-    private caretIndex: number;
+    private wordBeingWritten: string = "";
+    private caretIndex: number = 0;
 
-    private editEventInterrupted: boolean;
+    private editEventInterrupted: boolean = false;
 
     constructor(maxDisplayed: number = 5) {
         this.displayInfo = {maxRangeSize: maxDisplayed, start: 0, end: 0};
-        this.editEventInterrupted = false;
         this.possibleSuggestions = [
             {alias: "integral", actual: "\\integral"},
             {alias: "p1", actual: "\\integral"},
@@ -39,9 +38,6 @@ export class suggestionTab {
             {alias: "summation", actual: "\\summation"},
             {alias: "product", actual: "\\product"},
         ];
-        this.currentSuggestions = this.possibleSuggestions;
-        this.wordBeingWritten = "";
-        this.caretIndex = 0;
 
         const documentContainer = document.querySelector(".container");
         this.suggestionContainer = document.createElement("div");
