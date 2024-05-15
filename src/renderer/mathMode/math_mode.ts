@@ -169,3 +169,110 @@ function fixMathSpan(record: MutationRecord, observer: any) {
     });
     return;
 }
+
+export function prepMathFieldsForSave() {
+    const mathSpans = textArea.children;
+    const length = mathSpans.length;
+    for (let i = 0; i < length; i++) {
+        //hantera om det är flera rader
+        if (mathSpans[i].tagName === "DIV") {
+            const innerMathSpans = mathSpans[i].children;
+            const innerLength = innerMathSpans.length;
+
+            for (let j = 0; j < innerLength; j++) {
+                const latexSpan = document.createElement('latexspan');
+                latexSpan.textContent = MQ(innerMathSpans[j].children[1]).latex();
+                textArea.children[i].insertBefore(latexSpan, innerMathSpans[j]);
+                innerMathSpans[j + 1].remove();
+            }
+        } else {
+            const latexSpan = document.createElement('latexspan');
+            latexSpan.textContent = MQ(mathSpans[i].children[1]).latex();
+            textArea.insertBefore(latexSpan, mathSpans[i]);
+            mathSpans[i + 1].remove();
+        }
+    }
+}
+
+export function handleMathFieldsAfterLoad() {
+
+    amountOfMQFields = 0;
+
+    const latexSpans = document.querySelectorAll("latexspan") as NodeList;
+    const length = latexSpans.length;
+    console.log("Amount of latexspans: " + length);
+
+    for (let i = 0; i < length; i++) {
+        //set caret to before/after the latexspan
+        let curLatexNode = latexSpans[i];
+        let curParent = curLatexNode.parentNode as ParentNode;
+
+        let range = document.createRange();
+        let sel = window.getSelection();
+
+        var index = Array.from(curParent.childNodes).indexOf(curLatexNode as ChildNode);
+
+        range.setStart(curParent, index);
+        
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        
+        createMathField();
+
+        console.log("Created mathfield for index: " + i + " At index : " + index);
+
+        const mathSpans = document.querySelectorAll("mathspan") as NodeList;
+        let curMathSpan = mathSpans[i];
+
+        MQ(curMathSpan.childNodes[1]).write(curLatexNode.textContent);
+
+        curParent.removeChild(curLatexNode);
+        // MQ(getChildrenAsNodes()[i-1]).write((childrenAsNodes[(i * 2) + 1] as ChildNode).textContent);
+        // MQ(children[i-1]).write(children[i].textContent);
+        // children[i + 1].remove();
+    }
+
+
+
+
+
+    // const children = textArea.children;
+    // // const length = children.length;
+    // let childrenAsNodes = getChildrenAsNodes();
+    // amountOfMQFields = 0;
+
+    // for (let i = 0; i < length; i++) {
+    //     if (children[i].tagName === "DIV") {
+
+    //     } else if (children[i].tagName === "LATEXSPAN") {
+    //         //set caret to before/after the latexspan
+    //         let range = document.createRange();
+    //         let sel = window.getSelection();
+    //         range.setStart(textArea, childrenAsNodes[i*2] as number);
+            
+    //         sel?.removeAllRanges();
+    //         sel?.addRange(range);
+            
+    //         createMathField();
+    //         // MQ(getChildrenAsNodes()[i-1]).write((childrenAsNodes[(i * 2) + 1] as ChildNode).textContent);
+    //         // MQ(children[i-1]).write(children[i].textContent);
+    //         // children[i + 1].remove();
+    //     }
+    // } 
+}
+
+function getChildrenAsNodes() {
+    let childNodes = textArea.childNodes;
+    let length = childNodes.length;
+    let returnList: Array<ChildNode|number> = [];
+
+    for (let i = 0; i < length; i++) {
+        let node = childNodes[i]
+        if (node.nodeName !== "#text") {
+            console.log(node.nodeName);
+            returnList.push(i);
+            returnList.push(node);
+        }
+    }
+    return returnList;
+}

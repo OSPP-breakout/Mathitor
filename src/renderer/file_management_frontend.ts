@@ -1,3 +1,5 @@
+import {prepMathFieldsForSave, handleMathFieldsAfterLoad} from "./mathMode/math_mode";
+
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
 
 const textArea = document.getElementById('textarea') as HTMLElement;
@@ -69,7 +71,12 @@ function saveFile(): void {
 // Lets the user select a document to open
 function openFile(): void {
     // Send an 'open file'-request to the main process
-    window.electronAPI.openFileRequest();
+    // window.electronAPI.openFileRequest();
+
+
+
+    //Delete this and uncomment above
+    handleMathFieldsAfterLoad();
 }
 
 // Creates a new, unnamed and unsaved document
@@ -81,5 +88,8 @@ function createFile(): void {
 // Exports a document as a PDF (not yet implemented)
 function exportAsPDF(): void {
     // TODO...
+    prepMathFieldsForSave();
 }
+
+
 
