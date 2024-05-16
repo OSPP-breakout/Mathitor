@@ -1,4 +1,6 @@
+import { suggestionTab } from "../suggestionTab/suggestionTab";
 import { textArea } from "../text_mode";
+
 import * as Caret from "./caret";
 // Math mode global constants
 
@@ -8,11 +10,47 @@ export let mathMode = false;
 
 let amountOfMQFields = 0;
 let mathFieldArray: Array<any> = [];
-
-
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
-// Math mode functions
+const suggestionsTab = new suggestionTab();
+const closeSuggestions = () => {
+    suggestionsTab.close();
+}
+
+const closeMathField = (e: any) => {
+    const focusedOn = e.relatedTarget;
+    
+    if (focusedOn === null || focusedOn == undefined) {
+
+    } else if (!(focusedOn as HTMLElement).hasAttribute("suggestionValue")) {
+        closeSuggestions();
+    }
+}
+
+const focusSuggestions = () => {
+    suggestionsTab.focus();
+}
+
+const keydownSuggestions = (e: any) => {
+    if (suggestionsTab.hasSuggestions() === true && e.key === "ArrowDown") {
+        suggestionsTab.focus();
+    }
+}
+
+const keyupSuggestions = (e: any) => {
+    function isArrowMovement(key: string): boolean {
+        return key === "ArrowLeft" || key === "ArrowRight" ||
+               key === "ArrowDown" || key === "ArrowUp"
+    }
+
+    if (isArrowMovement(e.key)) {
+        suggestionsTab.update();
+    }
+}
+
+const clickSuggestions = (e: any) => {
+    suggestionsTab.update();
+}
 
 export function createMathField(): void {
     if (mathMode) return;
@@ -25,11 +63,14 @@ export function createMathField(): void {
     // Link the new MQ-field to the latex-preview
     var mathField = MQ.MathField(MQField, {
         handlers: {
-            edit: function () {
-                latexSpan.textContent = mathField.latex();
+            edit: (mathfield: any) => {
+                latexSpan.textContent = mathfield.latex();
+                suggestionsTab.open(mathfield);
             },
             moveOutOf: function (direction: any, mathfield: any) {
+                closeSuggestions();
                 mathfield.blur();
+
                 let range = document.createRange();
                 const caretPosition = document.getSelection();
                 const mathFieldNode = mathfield.el() as Node;
@@ -40,10 +81,12 @@ export function createMathField(): void {
                 }
                 caretPosition?.removeAllRanges();
                 caretPosition?.addRange(range);
-                console.log(window.getSelection()?.getRangeAt(0))
                 mathMode = false;
             },
-            deleteOutOf: function(dir: number, mathfield: any) {
+            downOutOf: () => {
+                focusSuggestions();
+            },
+            deleteOutOf: (dir: number, mathfield: any) => {
                 mathMode = false;
                 mathfield.blur();
                 let range = document.createRange();
@@ -56,9 +99,14 @@ export function createMathField(): void {
                 }
                 caretPos?.removeAllRanges();
                 caretPos?.addRange(range);
-            },
-        },
+            }
+        }
     });
+
+    mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
+    mathField.el().addEventListener('keyup', keyupSuggestions);
+    mathField.el().addEventListener('keydown', keydownSuggestions);
+    mathField.el().addEventListener('mousedown', clickSuggestions);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);

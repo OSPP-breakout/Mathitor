@@ -7,10 +7,9 @@
     "build": "webpack",
     "start": "electron-forge start",
     "format": "npx prettier ./src --write",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "wdio run ./wdio.conf.ts",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "test": "wdio run ./wdio.conf.ts"
+    "make": "electron-forge make"
   },
   "author": "derpy",
   "license": "ISC",
@@ -23,6 +22,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "@types/jquery": "^3.5.30",
     "@wdio/cli": "^8.36.1",
     "@wdio/local-runner": "^8.36.1",
     "@wdio/mocha-framework": "^8.36.1",

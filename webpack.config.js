@@ -23,24 +23,25 @@ module.exports = {
             {
                 test: /\.css/,
                 type: 'asset/resource',
-                include: [path.resolve(__dirname, 'src')]
+                include: [path.resolve(__dirname, 'src/assets')]
             },
             {
-                test: /\.txt/,
-                type: 'asset/source'
-            }
+                test: /\.json/,
+                type: 'asset/resource',
+                include: [path.resolve(__dirname, 'src/assets')]
+            },
         ]
     },
     resolve: {
         extensions: ['.ts', '.js']
     },
     output: {
-        publicPath: 'auto',
         filename: '[name].js',
+        assetModuleFilename: 'assets/[name][ext]',
         path: path.resolve(__dirname, 'dist'),
         clean: true
     },
     plugins: [new HtmlWebpackPlugin({
-        template: './src/index.html'
+        template: './src/assets/index.html'
     })]
 }
