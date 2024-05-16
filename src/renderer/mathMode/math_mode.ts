@@ -33,7 +33,6 @@ const focusSuggestions = () => {
 
 const keydownSuggestions = (e: any) => {
     if (suggestionsTab.hasSuggestions() === true && e.key === "ArrowDown") {
-        console.log("triggered!");
         suggestionsTab.focus();
     }
 }

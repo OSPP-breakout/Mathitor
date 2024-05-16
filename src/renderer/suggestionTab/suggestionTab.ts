@@ -1,5 +1,4 @@
 // TODO: add a feature for defining new aliases for one or multiple commands (optional)
-// TODO: load possible suggestions from a JSON file.
 
 interface suggestionEntry {
     alias: string,
@@ -45,18 +44,6 @@ export class suggestionTab {
             console.log(error);
         }
         
-    }
-
-    private async saveUserDefinedSuggestion() {
-        const suggestions: Array<suggestionEntry> = [
-            {alias: "integral", actual: "\\integral"},
-            {alias: "summation", actual: "\\summation"}
-        ];
-
-        const stringifiedSuggestions = JSON.stringify(suggestions); 
-        await window.electronAPI.saveUserDefinedSuggestion(stringifiedSuggestions);
-        const result = await window.electronAPI.loadUserDefinedSuggestions();
-        console.log(result);
     }
 
     /**
