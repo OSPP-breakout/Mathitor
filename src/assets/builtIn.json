@@ -1,0 +1,4 @@
+[
+    {"alias":"integral","actual":"\\integral"},
+    {"alias":"summation","actual":"\\summation"}
+]

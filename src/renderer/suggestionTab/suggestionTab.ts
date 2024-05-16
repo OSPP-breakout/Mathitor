@@ -12,9 +12,10 @@ interface suggestionRange {
     end: number
 }
 
+
 export class suggestionTab {
     private suggestionContainer: HTMLElement;
-    private possibleSuggestions: Array<suggestionEntry>;
+    private possibleSuggestions: Array<suggestionEntry> = [];
     
     private currentMathField: any;
     private currentSuggestions: Array<suggestionEntry> = [];
@@ -24,25 +25,38 @@ export class suggestionTab {
 
     private editEventInterrupted: boolean = false;
 
+
     constructor(maxDisplayed: number = 5) {
         this.displayInfo = {maxRangeSize: maxDisplayed, start: 0, end: 0};
-        this.possibleSuggestions = [
-            {alias: "integral", actual: "\\integral"},
-            {alias: "p1", actual: "\\integral"},
-            {alias: "p2", actual: "\\integral"},
-            {alias: "p3", actual: "\\integral"},
-            {alias: "p4", actual: "\\integral"},
-            {alias: "p5", actual: "\\integral"},
-            {alias: "p6", actual: "\\integral"},
-            {alias: "p7", actual: "\\integral"},
-            {alias: "summation", actual: "\\summation"},
-            {alias: "product", actual: "\\product"},
-        ];
+        
+        this.loadDefaultSuggestions();
 
         const documentContainer = document.querySelector(".container");
         this.suggestionContainer = document.createElement("div");
         this.suggestionContainer.style.position = "absolute";
         documentContainer?.appendChild(this.suggestionContainer);
+    }
+
+    private async loadDefaultSuggestions() {
+        try {
+            const defaults: Array<suggestionEntry> = JSON.parse(await window.electronAPI.loadBuiltInSuggestions());
+            this.possibleSuggestions = defaults;
+        } catch(error) {
+            console.log(error);
+        }
+        
+    }
+
+    private async saveUserDefinedSuggestion() {
+        const suggestions: Array<suggestionEntry> = [
+            {alias: "integral", actual: "\\integral"},
+            {alias: "summation", actual: "\\summation"}
+        ];
+
+        const stringifiedSuggestions = JSON.stringify(suggestions); 
+        await window.electronAPI.saveUserDefinedSuggestion(stringifiedSuggestions);
+        const result = await window.electronAPI.loadUserDefinedSuggestions();
+        console.log(result);
     }
 
     /**

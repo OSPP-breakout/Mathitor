@@ -1,3 +1,5 @@
+import { loadBuiltInSuggestions, loadUserDefinedSuggestions, saveUserDefinedSuggestion } from "./configLoader";
+
 const { contextBridge, ipcRenderer } = require('electron')
 
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
@@ -6,6 +8,8 @@ const { contextBridge, ipcRenderer } = require('electron')
 // and Electron APIs, such as ipcRenderer (used for message passing).
 // Wraps these parts in a custom API, which the renderer process
 // accesses through 'window.electronAPI'.
+
+// TODO: add function for sending a request to load suggestions and one to save suggestions.
 export const API = {
 
     // Functions for sending messages and requests to the main process
@@ -42,6 +46,10 @@ export const API = {
             }
         });
     }),
+
+    loadUserDefinedSuggestions: (): Promise<string> => ipcRenderer.invoke("load: user defined suggestions"),
+    loadBuiltInSuggestions: (): Promise<string> => ipcRenderer.invoke("load: built-in suggestions"),
+    saveUserDefinedSuggestion: (stringifiedJSON: string) => ipcRenderer.send("save: user defined suggestions", stringifiedJSON),
 
     // Returns the PID of the renderer process that called this function
     getRendererPID: () => process.pid
