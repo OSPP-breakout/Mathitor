@@ -217,3 +217,58 @@ function fixMathSpan(record: MutationRecord, observer: any) {
     });
     return;
 }
+
+export function translateMathFieldsForSave() {
+    const mathSpans = textArea.children;
+    const length = mathSpans.length;
+    for (let i = 0; i < length; i++) {
+        //hantera om det är flera rader
+        if (mathSpans[i].tagName === "DIV") {
+            const innerMathSpans = mathSpans[i].children;
+            const innerLength = innerMathSpans.length;
+
+            for (let j = 0; j < innerLength; j++) {
+                const latexSpan = document.createElement('latexspan');
+                latexSpan.textContent = MQ(innerMathSpans[j].children[1]).latex();
+                textArea.children[i].insertBefore(latexSpan, innerMathSpans[j]);
+                innerMathSpans[j + 1].remove();
+            }
+        } else {
+            const latexSpan = document.createElement('latexspan');
+            latexSpan.textContent = MQ(mathSpans[i].children[1]).latex();
+            textArea.insertBefore(latexSpan, mathSpans[i]);
+            mathSpans[i + 1].remove();
+        }
+    }
+}
+
+export function translateMathFieldsAfterLoad() {
+    amountOfMQFields = 0;
+    const latexSpans = document.querySelectorAll("latexspan") as NodeList;
+    const length = latexSpans.length;
+
+    for (let i = 0; i < length; i++) {
+        let curLatexNode = latexSpans[i];
+        let curParent = curLatexNode.parentNode as ParentNode;
+
+        //set caret position before latexspan, since createMathField() inserts field at caretposition
+        let range = document.createRange();
+        let sel = window.getSelection();
+
+        var index = Array.from(curParent.childNodes).indexOf(curLatexNode as ChildNode);
+
+        range.setStart(curParent, index);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        
+        createMathField();
+
+        const mathSpans = document.querySelectorAll("mathspan") as NodeList;
+        let curMathSpan = mathSpans[i];
+
+        MQ(curMathSpan.childNodes[1]).write(curLatexNode.textContent);
+
+        curParent.removeChild(curLatexNode);
+    }
+}
+
