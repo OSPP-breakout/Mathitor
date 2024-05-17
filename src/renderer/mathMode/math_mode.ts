@@ -48,9 +48,7 @@ const keyupSuggestions = (e: any) => {
     }
 }
 
-const clickSuggestions = (e: any) => {
-    suggestionsTab.update();
-}
+window.addEventListener('mousedown', closeSuggestions);
 
 export function createMathField(): void {
     if (mathMode) return;
@@ -99,6 +97,11 @@ export function createMathField(): void {
                 }
                 caretPos?.removeAllRanges();
                 caretPos?.addRange(range);
+            },
+            selectOutOf: (direction: number, mathField: any) => {
+                console.log("OUT!");
+                mathField.blur();
+                closeSuggestions();
             }
         }
     });
@@ -106,7 +109,6 @@ export function createMathField(): void {
     mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
     mathField.el().addEventListener('keyup', keyupSuggestions);
     mathField.el().addEventListener('keydown', keydownSuggestions);
-    mathField.el().addEventListener('mousedown', clickSuggestions);
     const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
     mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
     mathFieldArray.push(MQField);
