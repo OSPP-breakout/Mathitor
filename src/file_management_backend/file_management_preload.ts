@@ -13,32 +13,35 @@ export const API = {
     // ---------- Functions for sending messages and requests to the main process ----------
 
     /**
-     * Sends a request to set the title of a Mathitor window.
+     * Sends a request for the main process to set the title of a
+     * Mathitor window.
      * @param {string} title - The title to set.
      */
     setTitle: (title: string) => ipcRenderer.invoke('set-title', title),
 
     /**
-     * Sends a request to open a file dialog for the user to select
-     * a file to open.
+     * Sends a request for the main process to open a file dialog
+     * where the user can select a file to open.
      */
     openFileRequest: () => ipcRenderer.invoke('open-file'),
 
     /**
-     * Sends a request to create a new file.
+     * Sends a request for the main process to create a new file.
      */
     createFileRequest: () => ipcRenderer.invoke('create-file'),
 
     /**
-     * Sends a request to save the file content in a new file.
+     * Sends a request for the main process to save the file content
+     * in a new file.
      * @param {string} toSave - The file content to be saved.
      */
     saveAsRequest: (toSave: string) => ipcRenderer.invoke('save-file-as', { data: toSave }),
 
     /**
-     * Sends a request to save the file content with the given file path
+     * Sends a request for the main process to save the file with the
+     * given file path
      * @param {string} toSave - The content of the file to save.
-     * @param {string} filePath - The path where the file should be saved.
+     * @param {string} filePath - The path of the file to save.
      */
     saveRequest: (toSave: string, filePath: string) => ipcRenderer.invoke('save-file', { data: [toSave, filePath] }),
 
@@ -64,7 +67,9 @@ export const API = {
     }),
 
     /**
-     * Retrieves file content from the main process.
+     * Retrieves file content, file path, and the PID of the recipient
+     * renderer process, from the main process. Then forwards the
+     * file content and path to the renderer process.
      * @returns {Promise<Array<string>>} Resolves with an array containing
      * the received file content and file path.
      * @throws {Error} If the received renderer PID does not match the
@@ -86,10 +91,10 @@ export const API = {
     }),
 
 
-    // -------------------------------------------------------------------------------------
+    // -------------------------- Miscellaneous functions -----------------------------
 
     /**
-     * Gets the PID of the current renderer process.
+     * Gets the PID of the calling renderer process.
      * @returns {number} The PID of the calling renderer process.
      */
     getRendererPID: () => process.pid

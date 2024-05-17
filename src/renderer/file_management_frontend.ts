@@ -78,16 +78,15 @@ function saveFile(): void {
 
 /**
  * 
- * Sends an 'open file'-request to the main process to let
- * the user select a document from the local storage to open.
+ * Lets the user select a Mathitor document from local storage, and
+ * opens it.
  */
 function openFile(): void {
     window.electronAPI.openFileRequest();
 }
 
 /**
- * Creates a new, unnamed and unsaved document in a new window,
- * by sending a 'create file'-request to the main process.
+ * Creates a new, unnamed and unsaved document in a new window.
  */
 function createFile(): void {
     window.electronAPI.createFileRequest();
