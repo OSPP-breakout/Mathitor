@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import * as Config from "./file_management_backend/configLoader";
+import * as Config from "./fileManagementBackend/configLoader";
 
 // TODO: Move file management code to file_management_backend.ts
 

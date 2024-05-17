@@ -1,5 +1,5 @@
 import { suggestionTab } from "../suggestionTab/suggestionTab";
-import { textArea } from "../text_mode";
+import { textArea } from "../textMode";
 
 import * as Caret from "./caret";
 // Math mode global constants
@@ -9,7 +9,7 @@ const MQ = MathQuill.getInterface(2);
 export let mathMode = false;
 
 let amountOfMQFields = 0;
-let mathFieldArray: Array<any> = [];
+let mathFieldArray: Array<HTMLElement> = [];
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
 const suggestionsTab = new suggestionTab();
@@ -59,6 +59,18 @@ export function createMathField(): void {
     insertMathField(MQField, mathFieldSpan);
 
     // Link the new MQ-field to the latex-preview
+    var mathField = setupMathField(MQField);
+
+    // mathField.el().addEventListener('mousedown', clickSuggestions);
+    const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
+    mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
+    mathFieldArray.push(MQField);
+    window.getSelection()?.removeAllRanges();
+    mathField.focus();
+}
+
+function setupMathField(MQField: HTMLElement) {
+    
     var mathField = MQ.MathField(MQField, {
         handlers: {
             edit: (mathfield: any) => {
@@ -109,11 +121,8 @@ export function createMathField(): void {
     mathField.el().querySelector('textarea').addEventListener('focusout', closeMathField);
     mathField.el().addEventListener('keyup', keyupSuggestions);
     mathField.el().addEventListener('keydown', keydownSuggestions);
-    const mathSpanObserver = new MutationObserver((a, b) => fixMathSpan);
-    mathSpanObserver.observe(mathFieldSpan, {childList: true, subtree: true});
-    mathFieldArray.push(MQField);
-    window.getSelection()?.removeAllRanges();
-    mathField.focus();
+
+    return mathField;
 }
 
 function getCorrectParentElement(e: any): any {
@@ -274,3 +283,53 @@ export function translateMathFieldsAfterLoad() {
     }
 }
 
+export function handlePasteEvent(event: any): void {
+    if (event.inputType === "insertFromPaste") {
+        handleDuplicates();
+    }
+}
+
+function handleDuplicates() {
+
+    // console.log("Running handle duplicates");
+    let mathSpans = document.querySelectorAll("mathspan") as NodeList;
+    let length = mathSpans.length;
+    // console.log("Amount of mathspans: " + length)
+
+    for (let i = 0; i < length; i++) {
+        // Handle not initiated mathfields
+        let curMathField = mathSpans[i].childNodes[1];
+        if (MQ(curMathField) === null) {
+            // console.log("Found uninitiated mathfield");
+            let curName = curMathField.nodeName
+
+            let length2 = mathFieldArray.length;
+            // console.log("Length of mathFieldArray: " + length2);
+
+            for (let j = 0; j < length2; j++) {
+                // console.log("Matching " + curName + " with " + mathFieldArray[j].nodeName);
+                if (curName === mathFieldArray[j].nodeName) {
+                    // console.log("Found name match");
+
+                    amountOfMQFields++;
+                    let newMathField = document.createElement('math-field' + amountOfMQFields.toString());
+                    newMathField.setAttribute('id', 'math-field' + amountOfMQFields.toString());
+
+                    let oldContent = MQ(mathFieldArray[j]).latex();
+
+                    curMathField.parentNode?.replaceChild(newMathField, curMathField);
+                    let unused = setupMathField(newMathField);
+
+                    MQ(newMathField).write(oldContent);
+                    mathFieldArray.push(newMathField);
+
+                    // console.log("New nodeName: " + newMathField.nodeName);
+                }
+            }
+        }
+        // console.log(curMathField + " is already initialized")
+    }
+
+
+
+}

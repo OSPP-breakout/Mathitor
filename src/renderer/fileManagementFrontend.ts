@@ -1,4 +1,4 @@
-import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/math_mode";
+import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/mathMode";
 
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
 
@@ -19,6 +19,8 @@ window.electronAPI.getFileContent().then((fileContent: Array<string>) => {
 
     // Set the file path as the title of the Mathitor window
     window.electronAPI.setTitle(path);
+
+    translateMathFieldsAfterLoad();
 
 }).catch((error: Error) => {
     console.error(error.message);
@@ -79,8 +81,6 @@ function openFile(): void {
     // Send an 'open file'-request to the main process
     window.electronAPI.openFileRequest();
 
-    //TODO: Den här triggas typ för tidigt
-    translateMathFieldsAfterLoad();
 }
 
 // Creates a new, unnamed and unsaved document
