@@ -11,10 +11,10 @@ The documents created by the user are saved locally as files on the user's syste
 Immediately after starting the program, an unnamed, unsaved document is created and displayed in the starting window of the program. This document can be edited and saved as described in the sections below. If the document is closed without having been saved manually, the document is removed and any changes are lost.
 
 ### 2.2. Creating Files
-TODO
+A file can be created directly in the starting window by simply saving the document. Aside from creating a file in the starting window, a new file can be created by selecting 'New File' in the 'File'-dropdown menu in the toolbar. An unnamed, unsaved document that can be edited and saved will then be created and displayed in a new Mæthitor window.
 
 ### 2.3. Opening Files
-TODO
+By selecting 'Open' in the 'File'-dropdown menu in the toolbar, the user can open files that are saved locally on the user's system. This option will show an open file dialog, in which the user can select a file to open. The chosen file is then opened and displayed in a new Mæthitor window, ready to be edited and saved.
 
 ### 2.4. Saving Files
 TODO
