@@ -1,3 +1,5 @@
+import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/math_mode";
+
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
 
 const textArea = document.getElementById('textarea') as HTMLElement;
@@ -38,6 +40,9 @@ export function fileManagementOption(): void {
 
 // Saves a copy of the document, and lets the user select the file's name and path
 function saveFileAs(): void {
+
+    translateMathFieldsForSave();
+
     let toSave: string = textArea.innerHTML;
     console.log("Contents to be saved:\n" + toSave);
 
@@ -54,6 +59,9 @@ function saveFileAs(): void {
 
 // Saves the document
 function saveFile(): void {
+
+    translateMathFieldsForSave();
+
     let path: string = filePath.innerHTML;
     // Initial save is handled by saveFileAs()
     if (path == "") {
@@ -70,6 +78,9 @@ function saveFile(): void {
 function openFile(): void {
     // Send an 'open file'-request to the main process
     window.electronAPI.openFileRequest();
+
+    //TODO: Den här triggas typ för tidigt
+    translateMathFieldsAfterLoad();
 }
 
 // Creates a new, unnamed and unsaved document
@@ -82,4 +93,6 @@ function createFile(): void {
 function exportAsPDF(): void {
     // TODO...
 }
+
+
 
