@@ -14,6 +14,9 @@ const latexSpan = document.getElementById('latex') as HTMLElement;
 
 // Math mode functions
 
+/**
+ * Creates a mathField with a preset config at the current caret position
+ */
 export function createMathField(): void {
     if (mathMode) return;
     amountOfMQFields++;
@@ -105,6 +108,30 @@ export function activateMathField(sibling: Node, dir: number): void {
     else mathField.moveToLeftEnd();
 }
 
+/**
+ * Tries to initialize a mathfield. If the initilization fails it
+ * restores the mathfield to a structure that'll be initialized.
+ * 
+ * 
+*  @example if the field looks like this
+ *        mathSpan
+ *     /    |       \
+ *   span mathfield span
+ *           |
+ *          Bold
+ *          / \
+ *  textarea   writtenMath
+ * 
+ * it will become:
+ *        mathSpan
+ *     /    |       \
+ *   span mathfield span
+ *          / \
+ *  textarea   writtenMath
+ * 
+ * @param mathFieldElem mathField to activate
+ * @returns 
+ */
 function fixAndGetMathField(mathFieldElem: Node): any {
     if (MQ(mathFieldElem as HTMLElement) === null) {
         let childNode = mathFieldElem.childNodes[0];
@@ -120,6 +147,28 @@ function fixAndGetMathField(mathFieldElem: Node): any {
     return MQ(mathFieldElem);
 }
 
+/**
+ * Loops over all mathFields and checks if they still work by trying to initialize them
+ * if the initialization fails it removes all formatting applied to the field, and moves
+ * the children to the correct position
+ * 
+ * @example
+ *        mathSpan
+ *     /    |       \
+ *   span mathfield span
+ *           |
+ *          Bold
+ *          / \
+ *  textarea   writtenMath
+ * 
+ * will become:
+ *        mathSpan
+ *     /    |       \
+ *   span mathfield span
+ *          / \
+ *  textarea   writtenMath
+ * 
+ */
 export function correctAllMathFields() {
     mathFieldArray.forEach(mathFieldElem => {
         if (MQ(mathFieldElem as HTMLElement) === null) {
@@ -136,6 +185,11 @@ export function correctAllMathFields() {
     });
 }
 
+/**
+ * Checks if the caret is inside a mathSpan by going up the tree
+ * and activating the MathField inside it, if the caret is inside a
+ * mathSpan. 
+ */
 export function isInsideMathField() {
     const sel = window.getSelection();
     if (sel === null || sel === undefined) {
@@ -152,6 +206,13 @@ export function isInsideMathField() {
     }
 }
 
+/**
+ * Function called whenever a cahnge occurs in a mathspan
+ * if ever a mutation occurs that removes a span to the left or
+ * right of a mathfield it is restored
+ * @param record record of the occured mutations
+ * @param observer the observer that is currently looking at the field
+ */
 function fixMathSpan(record: MutationRecord, observer: any) {
     const removedNodes = record.removedNodes;
     removedNodes.forEach(element => {
@@ -167,9 +228,12 @@ function fixMathSpan(record: MutationRecord, observer: any) {
             }
         }
     });
-    return;
 }
 
+/**
+ * When called will translate all mathfields into latexspans
+ * with the latex currently written inside the mathfield
+ */
 export function translateMathFieldsForSave() {
     const mathSpans = textArea.children;
     const length = mathSpans.length;
@@ -194,6 +258,10 @@ export function translateMathFieldsForSave() {
     }
 }
 
+/**
+ * When called will replace all <latexspans> with mathfields with the
+ * contents of the <latexspan>
+ */
 export function translateMathFieldsAfterLoad() {
     amountOfMQFields = 0;
     const latexSpans = document.querySelectorAll("latexspan") as NodeList;

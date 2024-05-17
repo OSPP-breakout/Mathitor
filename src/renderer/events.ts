@@ -3,6 +3,10 @@ import * as ModeMode from './mathMode/math_mode';
 import * as MathModeCaret from './mathMode/caret';
 import * as TextMode from './text_mode';
 
+const electron = require("electron");
+const app = electron.app;
+const globalShortcut = electron.globalShortcut;
+
 interface Listener_info {
     element_id: string;
     action: string;
@@ -31,6 +35,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'button-MQ', action: 'click', callback: ModeMode.createMathField },
     { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
     { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
+    { element_id: 'textarea', action: 'click', callback: TextMode.findAndApplyCurrentFormatting },
+    { element_id: 'textarea', action: 'keyup', callback: TextMode.findAndApplyCurrentFormatting },
     { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
     { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
 ];
@@ -50,4 +56,10 @@ export function add_listeners() {
     listeners.forEach((listener) => {
         add_listener(listener);
     });
+}
+
+export function globalShortcuts() {
+    globalShortcut.register("CommandOrControl+B", () => {TextMode.bold});
+    globalShortcut.register("CommandOrControl+I", () => {TextMode.italic});
+    globalShortcut.register("CommandOrControl+U", () => {TextMode.underline});
 }

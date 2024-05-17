@@ -10,6 +10,11 @@ export enum Direction {
 declare let MathQuill: any;
 const MQ = MathQuill.getInterface(2);
 
+/**
+ * Checks which key is pressed and applies the correct function
+ * depending on the key pressed
+ * @param e Key being pressed
+ */
 export function handleCursor(e: any) {
     if (!mathMode) {
         var caretPos = window.getSelection() as Selection;
@@ -37,6 +42,13 @@ export function handleCursor(e: any) {
     }
 }
 
+/**
+ * When at the edge in the assigned direction
+ * of a mathfield will move out of it if the assigned key is pressed.
+ * If the field is empty and backspace or delete is pressed the field will be removed.
+ * @param range Range containing an element to move to
+ * @param mathFieldNode The current mathField the caret is inside
+ */
 export function arrowOutRight(range: Range, mathFieldNode: Node) {
     const nextParentElement = findSiblingToParentRight(mathFieldNode.parentNode as Node) as Node;
     let nextElement: Node;
@@ -46,6 +58,13 @@ export function arrowOutRight(range: Range, mathFieldNode: Node) {
     range.setEnd(nextElement, 0);
 }
 
+/**
+ * When at the edge in the assigned direction
+ * of a mathfield will move out of it if the assigned key is pressed.
+ * If the field is empty and backspace or delete is pressed the field will be removed.
+ * @param range Range containing an element to move to
+ * @param mathFieldNode The current mathField the caret is inside
+ */
 export function arrowOutLeft(range: Range, mathFieldNode: Node) {
     const previousParentElement = findSiblingToParentLeft(mathFieldNode.parentNode as Node) as Node;
     let previousElement: Node;
@@ -66,6 +85,13 @@ function putElementOutside(mathFieldNode: Node, dir: number): Node {
     return newElem;
 }
 
+/**
+ * When at the edge in the assigned direction
+ * of a mathfield will move out of it if the assigned key is pressed.
+ * If the field is empty and backspace or delete is pressed the field will be removed.
+ * @param range Range containing an element to move to
+ * @param mathFieldNode The current mathField the caret is inside
+ */
 export function deleteOutLeft(range: Range, mathFieldNode: Node): void {
     const previousParentElement = findSiblingToParentLeft(mathFieldNode?.parentNode as Node) as Node;
     const previousElement = findFirstChildRight(previousParentElement);
@@ -82,6 +108,13 @@ export function deleteOutLeft(range: Range, mathFieldNode: Node): void {
     
 }
 
+/**
+ * When at the edge in the assigned direction
+ * of a mathfield will move out of it if the assigned key is pressed.
+ * If the field is empty and backspace or delete is pressed the field will be removed.
+ * @param range Range containing an element to move to
+ * @param mathFieldNode The current mathField the caret is inside
+ */
 export function deleteOutRight(range: Range, mathFieldNode: Node): void {
     const NextParentElement = findSiblingToParentRight(mathFieldNode?.parentNode as Node) as Node;
     const nextElement = findFirstChildLeft(NextParentElement);
@@ -96,7 +129,16 @@ export function deleteOutRight(range: Range, mathFieldNode: Node): void {
     }
 }
 
-
+/**
+ * Takes an arbitrary node and checks if it's inside a subtree of a mathField
+ * Example:
+ *        mathField
+ *          / \
+ *       var   var
+ * will give the mathField if called from var
+ * @param n a node or HTMLElement to check
+ * @returns returns the mathField that is an ancestor in a tree if there is one, else null
+ */
 function isMathFieldBranch(n: Node | HTMLElement | null): HTMLElement | Node | null {
     return n === null
     ? n 
@@ -109,6 +151,11 @@ function isMathFieldBranch(n: Node | HTMLElement | null): HTMLElement | Node | n
                 : isMathFieldBranch((n.parentNode as Node));
 }
 
+/**
+ * Fetches an ancestor mathSpan if there is one to a node
+ * @param n node or HTMLElement if to start from
+ * @returns returns the mathSpan that is an ancestor in a tree if there is one, else null
+ */
 export function getMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | null {
     return n === null
     ? n 
@@ -121,12 +168,24 @@ export function getMathSpan(n: Node | HTMLElement | null): HTMLElement | Node | 
                 : getMathSpan((n.parentNode as Node));
 }
 
+/**
+ * Returns wheter an element is a mathSpan or not
+ * @param n Node or HTMLElement to check
+ * @returns returns true if the element is a mathSpan, else false
+ */
 function isMathSpan(n: Node | HTMLElement | null): boolean {
     return n === null 
     ? false
     : n.nodeName.startsWith("MATHSPAN");
 }
 
+/**
+ * Checks for mathFields in the assigned direction if there is one. If the caret is
+ * at the edge of the node bordering a mathField, it'll move into the field at the next 
+ * keypress in that direction. For events where there is no mathFields bordering the node,
+ * it does nothing.
+ * @param caretPos The current selection containing the caret.
+ */
 function handleLeftArrow(caretPos: Selection) {
     const caretOffset = caretPos.anchorOffset;
     const prevSibling = findSiblingToParentLeft(caretPos.focusNode as Node);
@@ -140,14 +199,18 @@ function handleLeftArrow(caretPos: Selection) {
     }
 }
 
+/**
+ * Checks for mathFields in the assigned direction if there is one. If the caret is
+ * at the edge of the node bordering a mathField, it'll move into the field at the next 
+ * keypress in that direction. For events where there is no mathFields bordering the node,
+ * it does nothing.
+ * @param caretPos The current selection containing the caret.
+ */
 function handleRightArrow(caretPos: Selection) {
     const caretOffset = caretPos.anchorOffset;
     const nextSibling = findSiblingToParentRight(caretPos.focusNode as Node);
     let mathFieldElem = findChildMathFieldLeft(nextSibling as Node);
     const nodeLengthToMathField = (caretPos.focusNode?.textContent?.length as number);
-    console.log("Next element: " + nextSibling?.nodeName + " Caret Pos: " + caretOffset + " Caret at: " + caretPos.focusNode?.textContent);
-    console.log("Next child elem: " + mathFieldElem?.nodeName);
-    console.log("");
     if (!mathMode && ((isMathSpan(nextSibling) || isMathField(mathFieldElem as Node)) && (caretOffset === nodeLengthToMathField))) {
         MathMode.activateMathField(nextSibling as Node, Direction.Right);
     } else if (!mathMode && isMathField(mathFieldElem = (isMathFieldBranch(caretPos?.focusNode)) as Node)) {
@@ -155,6 +218,13 @@ function handleRightArrow(caretPos: Selection) {
     }
 }
 
+/**
+ * Checks for mathFields in the assigned direction if there is one. If the caret is
+ * at the edge of the node bordering a mathField, it'll move into the field at the next 
+ * keypress in that direction. For events where there is no mathFields bordering the node,
+ * it does nothing.
+ * @param caretPos The current selection containing the caret.
+ */
 function handleBackSpace(caretPos: Selection) {
     const caretOffset = caretPos.anchorOffset;
     const prevSibling = findSiblingToParentLeft(caretPos.focusNode as Node);
@@ -169,6 +239,13 @@ function handleBackSpace(caretPos: Selection) {
     }
 }
 
+/**
+ * Checks for mathFields in the assigned direction if there is one. If the caret is
+ * at the edge of the node bordering a mathField, it'll move into the field at the next 
+ * keypress in that direction. For events where there is no mathFields bordering the node,
+ * it does nothing.
+ * @param caretPos The current selection containing the caret.
+ */
 function handleDelete(caretPos: Selection) {
     const caretOffset = caretPos.anchorOffset;
     const nextSibling = findSiblingToParentRight(caretPos.focusNode as Node);
@@ -184,6 +261,11 @@ function handleDelete(caretPos: Selection) {
     }
 }
 
+/**
+ * Takes a mathField as an HTMLElement and removes the mathSpan containing that
+ * field from the DOM.
+ * @param mathFieldNode The mathField to remove 
+ */
 function removeMathField(mathFieldNode: Node): void {
     const mathSpan = mathFieldNode.parentElement;
     const foreFather = mathSpan?.parentElement;
@@ -203,6 +285,12 @@ function findSiblingToParentLeft(n: Node): Node | null {
     : n.previousSibling;
 }
 
+/**
+ * Finds a mathField to the right if there is one by recursively going down the tree
+ * at the rightmost branch.
+ * @param n node to start checking from
+ * @returns mathField if there is one, else null
+ */
 export function findChildMathFieldRight(n: Node): Node | null {
     if (n === null || n === undefined) {
         return null;
@@ -218,6 +306,12 @@ export function findChildMathFieldRight(n: Node): Node | null {
             : findChildMathFieldRight(n.childNodes[index]);
 }
 
+/**
+ * Finds a mathField to the left if there is one by recursively going down the tree
+ * at the leftmost branch.
+ * @param n node to start checking from
+ * @returns mathField if there is one, else null
+ */
 export function findChildMathFieldLeft(n: Node): Node | null {
     const index = 0;
     return n === null || n === undefined
