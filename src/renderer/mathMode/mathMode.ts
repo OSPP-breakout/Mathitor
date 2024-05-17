@@ -48,9 +48,7 @@ const keyupSuggestions = (e: any) => {
     }
 }
 
-const clickSuggestions = (e: any) => {
-    suggestionsTab.update();
-}
+window.addEventListener('mousedown', closeSuggestions);
 
 export function createMathField(): void {
     if (mathMode) return;
@@ -111,6 +109,11 @@ function setupMathField(MQField: HTMLElement) {
                 }
                 caretPos?.removeAllRanges();
                 caretPos?.addRange(range);
+            },
+            selectOutOf: (direction: number, mathField: any) => {
+                console.log("OUT!");
+                mathField.blur();
+                closeSuggestions();
             }
         }
     });
