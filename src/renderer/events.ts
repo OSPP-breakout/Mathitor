@@ -32,7 +32,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
     { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
     { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
-    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
+    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption },
+    { element_id: 'textarea', action: 'input', callback: ModeMode.handlePasteEvent }
 ];
 
 export function add_listeners() {

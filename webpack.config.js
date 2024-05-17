@@ -8,7 +8,7 @@ module.exports = {
     entry: {
         index: './src/index.ts',
         renderer: './src/renderer/renderer.ts',
-        file_management_preload: './src/file_management_backend/file_management_preload.ts'
+        file_management_preload: './src/fileManagementBackend/fileManagementPreload.ts'
     },
     devServer: {
         static: './dist'

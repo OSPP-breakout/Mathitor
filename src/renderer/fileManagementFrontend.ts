@@ -1,4 +1,4 @@
-import {translateMathFieldsForSave, translateMathFieldsAfterLoad, handleDuplicates} from "./mathMode/mathMode";
+import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/mathMode";
 
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
 
@@ -92,8 +92,6 @@ function createFile(): void {
 // Exports a document as a PDF (not yet implemented)
 function exportAsPDF(): void {
     // TODO...
-
-    handleDuplicates();
 }
 
 

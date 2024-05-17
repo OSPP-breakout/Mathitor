@@ -283,26 +283,33 @@ export function translateMathFieldsAfterLoad() {
     }
 }
 
-export function handleDuplicates() {
+export function handlePasteEvent(event: any): void {
+    if (event.inputType === "insertFromPaste") {
+        handleDuplicates();
+    }
+}
 
-    console.log("Running handle duplicates");
+function handleDuplicates() {
+
+    // console.log("Running handle duplicates");
     let mathSpans = document.querySelectorAll("mathspan") as NodeList;
     let length = mathSpans.length;
+    // console.log("Amount of mathspans: " + length)
 
     for (let i = 0; i < length; i++) {
         // Handle not initiated mathfields
         let curMathField = mathSpans[i].childNodes[1];
         if (MQ(curMathField) === null) {
-            console.log("Found uninitiated mathfield");
+            // console.log("Found uninitiated mathfield");
             let curName = curMathField.nodeName
 
             let length2 = mathFieldArray.length;
-            console.log("Length of mathFieldArray: " + length2);
+            // console.log("Length of mathFieldArray: " + length2);
 
             for (let j = 0; j < length2; j++) {
-                console.log("Matching " + curName + " with " + mathFieldArray[j].nodeName);
+                // console.log("Matching " + curName + " with " + mathFieldArray[j].nodeName);
                 if (curName === mathFieldArray[j].nodeName) {
-                    console.log("Found name match");
+                    // console.log("Found name match");
 
                     amountOfMQFields++;
                     let newMathField = document.createElement('math-field' + amountOfMQFields.toString());
@@ -311,15 +318,16 @@ export function handleDuplicates() {
                     let oldContent = MQ(mathFieldArray[j]).latex();
 
                     curMathField.parentNode?.replaceChild(newMathField, curMathField);
-                    setupMathField(newMathField);
+                    let unused = setupMathField(newMathField);
 
                     MQ(newMathField).write(oldContent);
                     mathFieldArray.push(newMathField);
 
-                    console.log("New nodeName: " + newMathField.nodeName);
+                    // console.log("New nodeName: " + newMathField.nodeName);
                 }
             }
         }
+        // console.log(curMathField + " is already initialized")
     }
 
 
