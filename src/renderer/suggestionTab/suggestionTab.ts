@@ -203,7 +203,7 @@ export class suggestionTab {
      */
     private getCurrentWord() {
         const mathFieldInput = this.updateCaretIndex();
-        const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3"]; 
+        const delimiters: Array<string> = ["\\", " ", "{", "}", "-", "+", "1", "2", "3", "4", "5", "6", "7", "8", "9"]; 
         let i = mathFieldInput.length - 1;
 
         while ((i >= 0) && !delimiters.includes(mathFieldInput[i])) {
