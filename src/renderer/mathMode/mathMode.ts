@@ -128,6 +128,11 @@ function setupMathField(MQField: HTMLElement) {
     return mathField;
 }
 
+/**
+ * Goes up the tree recursively until it finds the textArea
+ * @param e Node to start checking from
+ * @returns the node just below the textArea, else null
+ */
 function getCorrectParentElement(e: any): any {
     return e === null
         ? null
@@ -158,6 +163,12 @@ function insertMathField(mathField: HTMLElement, mathFieldSpan: HTMLElement) {
     }
 }
 
+/**
+ * activates a MathField when moving into it with a caret from a given direction
+ * by first finding it inside a sibling node, then activating it.
+ * @param sibling Sibling to find mathField inside
+ * @param dir LEFT or RIGHT (-1, 1)
+ */
 export function activateMathField(sibling: Node, dir: number): void {
     mathMode = true;
     const mathFieldElem = dir === Caret.Direction.Left ? Caret.findChildMathFieldRight(sibling) : Caret.findChildMathFieldLeft(sibling);
