@@ -1,4 +1,4 @@
-import { API } from "../../file_management_backend/file_management_preload";
+import { API } from "../../fileManagementBackend/fileManagementPreload";
 
 declare global {
     interface Window {electronAPI: typeof API}

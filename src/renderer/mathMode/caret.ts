@@ -1,5 +1,5 @@
-import * as MathMode from "./math_mode"
-import {mathMode} from "./math_mode"
+import * as MathMode from "./mathMode"
+import {mathMode} from "./mathMode"
 const mathPlacement = 1;
 export enum Direction {
     Up,

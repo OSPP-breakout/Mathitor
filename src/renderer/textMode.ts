@@ -1,5 +1,5 @@
 export const textArea = document.getElementById('textarea') as HTMLElement;
-import { correctAllMathFields } from "./mathMode/math_mode";
+import { correctAllMathFields } from "./mathMode/mathMode";
 const fileName = document.getElementById('filename') as HTMLElement;
 
 export function undo(): void {

@@ -1,7 +1,7 @@
-import * as FileManagement from './file_management_frontend';
-import * as ModeMode from './mathMode/math_mode';
+import * as FileManagement from './fileManagementFrontend';
+import * as ModeMode from './mathMode/mathMode';
 import * as MathModeCaret from './mathMode/caret';
-import * as TextMode from './text_mode';
+import * as TextMode from './textMode';
 
 interface Listener_info {
     element_id: string;
@@ -50,4 +50,5 @@ export function add_listeners() {
     listeners.forEach((listener) => {
         add_listener(listener);
     });
+
 }
