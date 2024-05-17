@@ -1,3 +1,0 @@
-arccos arcsin arctan cos cosh cot coth
-csc deg det dim exp gcd hom inf ker lg liminf
-limsup ln log max min sec sin sinh sup tan tanh

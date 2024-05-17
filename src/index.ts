@@ -1,9 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import * as Config from "./fileManagementBackend/configLoader";
 
 // TODO: Move file management code to file_management_backend.ts
 
+// TODO: Add documentation
+function loadBuiltInSuggestions() {
+    console.log("Hey! I didn't load anything. GET PRANKED!");
+    return "HI";
+}
 
 // ------------ Create new renderer process ------------
 
@@ -23,7 +29,7 @@ const createWindow = () => {
     window.loadFile('dist/index.html');
     window.maximize();
     window.show();
-    //add_listeners();
+
     return window;
 }
 
@@ -34,7 +40,11 @@ const createWindow = () => {
 // window when the app is ready.
 app.whenReady().then(() => {
     createWindow();
-})
+
+    ipcMain.handle("load: user defined suggestions", Config.loadUserDefinedSuggestions);
+    ipcMain.handle("load: built-in suggestions", Config.loadBuiltInSuggestions);
+    ipcMain.on("save: user defined suggestions", Config.saveUserDefinedSuggestion);
+});
 
 
 // ------------------- File Management ---------------------
