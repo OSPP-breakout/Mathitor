@@ -4,8 +4,14 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 
 // TODO: Move file management code to file_management_backend.ts
 
+
 // ------------ Create new renderer process ------------
 
+/**
+ * Creates a new renderer process by creating a new Mathitor window.
+ * Specifies the dimensions of the windows and loads the index.html file.
+ * @returns {BrowserWindow} The newly created Mathitor window.
+ */
 const createWindow = () => {
     const window = new BrowserWindow({
         width: 800,
@@ -21,15 +27,26 @@ const createWindow = () => {
     return window;
 }
 
+
 // ----------- Create the first renderer process -----------
 
+/**
+ * Creates the first renderer process by creating a new
+ * Mathitor window when the app is ready.
+ */
 app.whenReady().then(() => {
     createWindow();
 })
 
+
 // ------------------- File Management ---------------------
 
-// Check if file with a given file path is open
+/**
+ * Checks if a file with a given file path is open in any Mathitor window.
+ * @param {string} filePath - The file path to check.
+ * @returns {BrowserWindow | null} The window containing the file if it
+ * is open. Otherwise, null is returned.
+ */
 function fileIsOpen(filePath: string) {
     const allWindows = BrowserWindow.getAllWindows();
     for (const window of allWindows) {
@@ -41,22 +58,32 @@ function fileIsOpen(filePath: string) {
     return null;
 }
 
-// Set the title of a Mathitor window
+/**
+ * Sets the title of a Mathitor window.
+ * @param {Electron.IpcMainInvokeEvent} event - The event object
+ * @param {string} title - The title to set for the window
+ */
 ipcMain.handle('set-title', async (event, title) => {
     const webContents = event.sender;
     const win = BrowserWindow.fromWebContents(webContents);
     win?.setTitle(title);
 })
 
-// Backend of the saveFileAs() function. Writes 'data' to a path chosen by the user
-ipcMain.handle('save-file-as', async (event, { data }) => {
+/**
+ * Backend of the saveFileAs() function.
+ * Writes the file content to a path chosen by the user.
+ * @param {Electron.IpcMainInvokeEvent} event - The event object
+ * @param {string} content - The file content to be written to the file
+ * @throws {Error} If the operation failed or was canceled by the user.
+ */
+ipcMain.handle('save-file-as', async (event, { content }) => {
 
     // Let the user select name and path for the file
     dialog.showSaveDialog({ defaultPath: 'file.txt' }).then((result) => {
         
         if (!result.canceled && result.filePath) {
             const path: string = result.filePath;
-            fs.writeFile(path, data, async (err) => {
+            fs.writeFile(path, content, async (err) => {
                 
                 if (err) {
                     console.error('Error saving file:\n', err);
@@ -78,11 +105,18 @@ ipcMain.handle('save-file-as', async (event, { data }) => {
     });
 });
 
-// Backend of the saveFile() function
+/**
+ * Backend of the saveFile() function.
+ * Writes the file content to the specified path.
+ * @param {Electron.IpcMainInvokeEvent} event - The event object.
+ * @param {Array<string>} data - An array containing the file content
+ * to be saved and the file path.
+ * @throws {Error} If there is an error while saving the file.
+ */
 ipcMain.handle('save-file', async (event, { data }) => {
-    const toSave: string = data[0]; // File contents to save
-    const path: string = data[1]; // Path of the file to save
-    fs.writeFile(path, toSave, (err) => {
+    const content: string = data[0];    // File contents to save
+    const path: string = data[1];       // Path of the file to save
+    fs.writeFile(path, content, (err) => {
         if (err) {
             console.error('Error saving file:\n', err);
             event.sender.send('save-file-response', { success: false, error: err });
@@ -93,7 +127,15 @@ ipcMain.handle('save-file', async (event, { data }) => {
     });
 });
 
-// Backend of the openFile() function
+/**
+ * Backend of the openFile() function.
+ * Opens a file selected by the user in a new window. A file can only
+ * be open in one window at a time, so if the chosen file is already open,
+ * focus is shifted to the window where the file is open.
+ * @param {Electron.IpcMainEvent} event - The event object.
+ * @throws {Error} If there is an error while opening the file or
+ * showing the open dialog.
+ */
 ipcMain.handle('open-file', async (event) => {
 
     // Let the user select a file from the local file manager
@@ -142,7 +184,12 @@ ipcMain.handle('open-file', async (event) => {
     });
 });
 
-// Backend of the createFile() function
+/**
+ * Backend of the createFile() function.
+ * Handles the creation of a new file by opening a new Mathitor window.
+ * @param {Electron.IpcMainEvent} event - The event object.
+ * @throws {NodeJS.ErrnoException} If there is an error while creating the new file.
+ */
 ipcMain.handle('create-file', async (event) => {
     try {
         createWindow();
