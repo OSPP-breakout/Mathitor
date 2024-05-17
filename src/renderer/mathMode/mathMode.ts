@@ -13,7 +13,7 @@ let mathFieldArray: Array<HTMLElement> = [];
 const latexSpan = document.getElementById('latex') as HTMLElement;
 
 const suggestionsTab = new suggestionTab();
-const closeSuggestions = () => {
+export const closeSuggestions = () => {
     suggestionsTab.close();
 }
 
@@ -48,7 +48,8 @@ const keyupSuggestions = (e: any) => {
     }
 }
 
-window.addEventListener('mousedown', closeSuggestions);
+//TODO: Remove this later! I have moved this to events.ts. In the future put all eventListeners there
+// window.addEventListener('mousedown', closeSuggestions);
 
 /**
  * Creates a mathField with a preset config at the current caret position
@@ -71,6 +72,7 @@ export function createMathField(): void {
     window.getSelection()?.removeAllRanges();
     mathField.focus();
 }
+
 
 function setupMathField(MQField: HTMLElement) {
 

@@ -1,11 +1,7 @@
 import * as FileManagement from './fileManagementFrontend';
-import * as ModeMode from './mathMode/mathMode';
+import * as MathMode from './mathMode/mathMode';
 import * as MathModeCaret from './mathMode/caret';
 import * as TextMode from './textMode';
-
-const electron = require("electron");
-const app = electron.app;
-const globalShortcut = electron.globalShortcut;
 
 interface Listener_info {
     element_id: string;
@@ -32,12 +28,13 @@ const listeners: Array<Listener_info> = [
     { element_id: 'btn-align-r', action: 'click', callback: TextMode.align_right },
     { element_id: 'lower-upper', action: 'click', callback: TextMode.text_lower_or_upper },
     { element_id: 'btn-slash', action: 'click', callback: TextMode.text_slash },
-    { element_id: 'button-MQ', action: 'click', callback: ModeMode.createMathField },
+    { element_id: 'button-MQ', action: 'click', callback: MathMode.createMathField },
     { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
-    { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
+    { element_id: 'textarea', action: 'click', callback: MathMode.isInsideMathField },
     { element_id: 'textarea', action: 'click', callback: TextMode.findAndApplyCurrentFormatting },
     { element_id: 'textarea', action: 'keyup', callback: TextMode.findAndApplyCurrentFormatting },
     { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
+    { element_id: 'window', action: 'mousedown', callback: MathMode.closeSuggestions },
     { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
 ];
 
