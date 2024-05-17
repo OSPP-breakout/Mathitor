@@ -1,7 +1,7 @@
-import * as FileManagement from './file_management_frontend';
-import * as ModeMode from './mathMode/math_mode';
+import * as FileManagement from './fileManagementFrontend';
+import * as ModeMode from './mathMode/mathMode';
 import * as MathModeCaret from './mathMode/caret';
-import * as TextMode from './text_mode';
+import * as TextMode from './textMode';
 
 const electron = require("electron");
 const app = electron.app;
@@ -56,10 +56,4 @@ export function add_listeners() {
     listeners.forEach((listener) => {
         add_listener(listener);
     });
-}
-
-export function globalShortcuts() {
-    globalShortcut.register("CommandOrControl+B", () => {TextMode.bold});
-    globalShortcut.register("CommandOrControl+I", () => {TextMode.italic});
-    globalShortcut.register("CommandOrControl+U", () => {TextMode.underline});
 }

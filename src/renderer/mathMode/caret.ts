@@ -1,5 +1,5 @@
-import * as MathMode from "./math_mode"
-import {mathMode} from "./math_mode"
+import * as MathMode from "./mathMode"
+import {mathMode} from "./mathMode"
 const mathPlacement = 1;
 export enum Direction {
     Up,
@@ -36,7 +36,6 @@ export function handleCursor(e: any) {
                 handleDelete(caretPos);
                 break;
             default:
-                //console.log(e.key)
                 return;
         }
     }
@@ -233,7 +232,6 @@ function handleBackSpace(caretPos: Selection) {
         || (isMathSpan(prevSibling) && caretOffset === (nodeLengthToMathField - 1)))) {
             MathMode.activateMathField(prevSibling as Node, Direction.Left);
     } else if (!mathMode && caretOffset === 1 && caretPos.focusNode?.textContent?.length === 1) {
-        console.log("Prev sibling: " + prevSibling?.nodeName)
         caretPos.focusNode.textContent = "\u00A0";  
         MathMode.activateMathField(prevSibling as Node, Direction.Left);
     }
