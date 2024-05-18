@@ -21,7 +21,7 @@ window.electronAPI.getFileContent().then((fileContent: Array<string>) => {
     // Set the file path as the title of the Mathitor window
     window.electronAPI.setTitle(path);
 
-    //translateMathFieldsAfterLoad();
+    translateMathFieldsAfterLoad();
 
 }).catch((error: Error) => {
     console.error(error.message);
@@ -50,7 +50,7 @@ export function fileManagementOption(): void {
  */
 function saveFileAs(): void {
 
-    //translateMathFieldsForSave();
+    translateMathFieldsForSave();
 
     let toSave: string = textArea.innerHTML;
     console.log("Contents to be saved:\n" + toSave);
@@ -64,6 +64,8 @@ function saveFileAs(): void {
         console.log("Received file path:\n" + path);
         window.electronAPI.setTitle(path);
     });
+
+    translateMathFieldsAfterLoad();
 }
 
 /**
@@ -72,7 +74,7 @@ function saveFileAs(): void {
  */
 function saveFile(): void {
 
-    //translateMathFieldsForSave();
+    translateMathFieldsForSave();
 
     let path: string = filePath.innerHTML;
     // Initial save is handled by saveFileAs()
@@ -84,6 +86,8 @@ function saveFile(): void {
         // Send the contents to be saved (including the file path) to the main process
         window.electronAPI.saveRequest(toSave, path);
     }
+
+    translateMathFieldsAfterLoad();
 }
 
 /**
