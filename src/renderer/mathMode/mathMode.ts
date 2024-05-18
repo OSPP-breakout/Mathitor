@@ -240,13 +240,14 @@ export function translateMathFieldsForSave() {
 
             for (let j = 0; j < innerLength; j++) {
                 const latexSpan = document.createElement('latexspan');
-                latexSpan.textContent = MQ(innerMathSpans[j].children[1]).latex();
+                latexSpan.textContent = fixAndGetMathField(innerMathSpans[j].children[1]).latex();
                 textArea.children[i].insertBefore(latexSpan, innerMathSpans[j]);
                 innerMathSpans[j + 1].remove();
             }
-        } else {
+        } else if (mathSpans[i].tagName === "MATHSPAN") {
             const latexSpan = document.createElement('latexspan');
-            latexSpan.textContent = MQ(mathSpans[i].children[1]).latex();
+            console.log("Kan inte läsa latex av (tagname): " + mathSpans[i].children[1].tagName)
+            latexSpan.textContent = fixAndGetMathField(mathSpans[i].children[1]).latex();
             textArea.insertBefore(latexSpan, mathSpans[i]);
             mathSpans[i + 1].remove();
         }
@@ -290,7 +291,8 @@ export function handlePasteEvent(event: any): void {
 }
 
 function handleDuplicates() {
-
+    correctAllMathFields();
+    
     // console.log("Running handle duplicates");
     let mathSpans = document.querySelectorAll("mathspan") as NodeList;
     let length = mathSpans.length;
