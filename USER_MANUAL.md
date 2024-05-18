@@ -29,7 +29,7 @@ In the current Mæthitor update, exporting documents to PDF is not supported. Wh
 ## 3. Writing a Mæthitor Document
 When writing a Mæthitor document, there are two modes in which the user can write: 'Text mode' and 'Math mode'. Text mode is the standard mode and is used for writing regular, formatted text, whereas Math mode is used for writing mathematical symbols and expressions. These are described in more detail below.
 
-## 3.1. Text mode
+### 3.1. Text mode
 By default, text is written in Text mode. In text mode, the user can write rich (i.e. formatted) text similarly to how rich text is written in other editors such as Microsoft Word or Google Docs. Text can be formatted by clicking on the icons in the toolbar, as well as by short-hand commands in the case of bold (Ctrl + B), italic (Ctrl + I) and underlined (Ctrl + U) text.
 
 The formatting options supported are:
@@ -45,13 +45,13 @@ In the current Mæthitor version, the following formatting options are included 
 - Background color
 - Hyperlink insertion and removal
 
-## 3.2. Math mode
+### 3.2. Math mode
 Math mode is entered by clicking on the 'Σ' icon in the toolbar. This will create a math field, i.e. a box in which to write mathematical symbols and expressions. To leave Math mode, the caret (a.k.a. insertion point or cursor), should be moved out of the math field.
 
 In a math field, mathematical symbols and operators are written by writing their corresponding keywords in plain text. After writing a complete keyword, the keyword is replaced by the corresponding symbol or operator. When writing keywords, auto-complete suggestions will appear. For example, writing 's' in math mode will generate the suggestions 'summation' (keyword for the 'Σ' operator) and 'sigma' (keyword for the symbol 'σ').
 
 TODO: Skriv eller hänvisa till en lista på alla nyckelord?
 
-## 3.3. Other functionality
+### 3.3. Other functionality
 In addition to the writing and formatting functionality mentioned above, Mæthitor also supports the following functionality:
 - Undo (Ctrl + Z) and redo (Ctrl + Y). These are represented by the curved arrows in the toolbar
