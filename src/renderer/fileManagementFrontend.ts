@@ -1,4 +1,4 @@
-import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/math_mode";
+import {translateMathFieldsForSave, translateMathFieldsAfterLoad} from "./mathMode/mathMode";
 
 // TODO: Error handling (i.e. handle all the responses from the file management backend)
 
@@ -13,18 +13,24 @@ window.electronAPI.getFileContent().then((fileContent: Array<string>) => {
     console.log('Received file path:\n', path);
     console.log('Received file content\n:', data);
 
-    // Insert the received file content and file path in their respective elements in 'dist/index.html'
+    // Insert the received file content and file path in their 
+    // respective elements in 'dist/index.html'
     textArea.innerHTML = data;
     filePath.innerHTML = path;
 
     // Set the file path as the title of the Mathitor window
     window.electronAPI.setTitle(path);
 
+    translateMathFieldsAfterLoad();
+
 }).catch((error: Error) => {
     console.error(error.message);
 });
 
-// Handles creating, saving, loading and exporting files
+/**
+ * Handles the options presented in the file-dropdown menu,
+ * i.e creating, saving, loading and exporting files.
+ */
 export function fileManagementOption(): void {
     const selectedOption = fileDropdown.options[fileDropdown.selectedIndex];
 
@@ -38,7 +44,10 @@ export function fileManagementOption(): void {
     fileDropdown.selectedIndex = 0;
 }
 
-// Saves a copy of the document, and lets the user select the file's name and path
+/**
+ * Saves a copy of the document, and lets the user select
+ * the file's name and path.
+ */
 function saveFileAs(): void {
 
     translateMathFieldsForSave();
@@ -47,7 +56,7 @@ function saveFileAs(): void {
     console.log("Contents to be saved:\n" + toSave);
 
     // Send the contents to be saved to the main process
-    window.electronAPI.saveAs(toSave);
+    window.electronAPI.saveAsRequest(toSave);
 
     // Insert the received file path in the filepath element
     window.electronAPI.saveAsResponse().then((path: string) => {
@@ -55,9 +64,14 @@ function saveFileAs(): void {
         console.log("Received file path:\n" + path);
         window.electronAPI.setTitle(path);
     });
+
+    translateMathFieldsAfterLoad();
 }
 
-// Saves the document
+/**
+ * Saves the document. If the file is saved for the first time
+ * the user has to select the file's name and path.
+ */
 function saveFile(): void {
 
     translateMathFieldsForSave();
@@ -70,26 +84,32 @@ function saveFile(): void {
         let toSave: string = textArea.innerHTML;
         console.log("Contents to be saved:\n" + toSave);
         // Send the contents to be saved (including the file path) to the main process
-        window.electronAPI.save(toSave, path);
+        window.electronAPI.saveRequest(toSave, path);
     }
-}
 
-// Lets the user select a document to open
-function openFile(): void {
-    // Send an 'open file'-request to the main process
-    window.electronAPI.openFileRequest();
-
-    //TODO: Den här triggas typ för tidigt
     translateMathFieldsAfterLoad();
 }
 
-// Creates a new, unnamed and unsaved document
+/**
+ * 
+ * Lets the user select a Mathitor document from local storage, and
+ * opens it.
+ */
+function openFile(): void {
+    window.electronAPI.openFileRequest();
+
+}
+
+/**
+ * Creates a new, unnamed and unsaved document in a new window.
+ */
 function createFile(): void {
-    // Send a 'create file'-request to the main process
     window.electronAPI.createFileRequest();
 }
 
-// Exports a document as a PDF (not yet implemented)
+/**
+ * Exports a document as a PDF (not yet implemented)
+ */
 function exportAsPDF(): void {
     // TODO...
 }

@@ -1,7 +1,7 @@
-import * as FileManagement from './file_management_frontend';
-import * as ModeMode from './mathMode/math_mode';
+import * as FileManagement from './fileManagementFrontend';
+import * as ModeMode from './mathMode/mathMode';
 import * as MathModeCaret from './mathMode/caret';
-import * as TextMode from './text_mode';
+import * as TextMode from './textMode';
 
 interface Listener_info {
     element_id: string;
@@ -32,7 +32,8 @@ const listeners: Array<Listener_info> = [
     { element_id: 'textarea', action: 'keydown', callback: MathModeCaret.handleCursor },
     { element_id: 'textarea', action: 'click', callback: ModeMode.isInsideMathField },
     { element_id: 'btn-justify-full', action: 'click', callback: TextMode.justify_full },
-    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption }
+    { element_id: 'file-dropdown', action: 'change', callback: FileManagement.fileManagementOption },
+    { element_id: 'textarea', action: 'input', callback: ModeMode.handlePasteEvent }
 ];
 
 export function add_listeners() {
@@ -50,4 +51,5 @@ export function add_listeners() {
     listeners.forEach((listener) => {
         add_listener(listener);
     });
+
 }
