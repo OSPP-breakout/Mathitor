@@ -46,9 +46,9 @@ In the current Mæthitor version, the following formatting options are included 
 - Hyperlink insertion and removal
 
 ## 3.2. Math mode
-Math mode is entered by clicking on the 'Σ' icon in the toolbar. This will create a math field, i.e. a box in which to write mathematical symbols and expressions. In a math field, mathematical symbols and operators are written by writing their corresponding keywords in plain text. After writing a complete keyword, the keyword is replaced by the corresponding symbol or operator.
+Math mode is entered by clicking on the 'Σ' icon in the toolbar. This will create a math field, i.e. a box in which to write mathematical symbols and expressions. To leave Math mode, the caret (a.k.a. insertion point or cursor), should be moved out of the math field.
 
-When writing keywords, auto-complete suggestions will appear. For example, writing 's' in math mode will generate the suggestions 'summation' (keyword for the 'Σ' operator) and 'sigma' (keyword for the symbol 'σ').
+In a math field, mathematical symbols and operators are written by writing their corresponding keywords in plain text. After writing a complete keyword, the keyword is replaced by the corresponding symbol or operator. When writing keywords, auto-complete suggestions will appear. For example, writing 's' in math mode will generate the suggestions 'summation' (keyword for the 'Σ' operator) and 'sigma' (keyword for the symbol 'σ').
 
 TODO: Skriv eller hänvisa till en lista på alla nyckelord?
 
