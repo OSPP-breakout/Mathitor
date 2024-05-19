@@ -11,10 +11,6 @@ The documents created by the user are saved locally as files on the user's syste
 Immediately after starting the program, an unnamed, unsaved document is created and displayed in the starting window of the program. This document can be edited and saved as described in the sections below. If the document is closed without having been saved manually, the document is removed and any changes are lost.
 
 ### 2.2. Creating Files
-A file can be created directly in the starting window by simply saving the document. Aside from creating a file in the starting window, a new file can be created by selecting 'New File' in the 'File' dropdown menu in the toolbar. An unnamed, unsaved document that can be edited and saved will then be created and displayed in a new Mæthitor window.
-
------------------- Alternativ till ovan: ------------------
-
 Aside from the file that is automatically created in the starting window, a new file can be created by selecting 'New File' in the 'File' dropdown menu in the toolbar. This will be displayed in a separate window. Again, the file will be removed if it is not saved manually.
 
 ### 2.3. Opening Files
@@ -49,8 +45,6 @@ In the current Mæthitor version, the following formatting options are included 
 Math mode is entered by clicking on the 'Σ' icon in the toolbar. This will create a math field, i.e. a box in which to write mathematical symbols and expressions. To leave Math mode, the caret (a.k.a. insertion point or cursor), should be moved out of the math field.
 
 In a math field, mathematical symbols and operators are written by writing their corresponding keywords in plain text. After writing a complete keyword, the keyword is replaced by the corresponding symbol or operator. When writing keywords, auto-complete suggestions will appear. For example, writing 's' in math mode will generate the suggestions 'summation' (keyword for the 'Σ' operator) and 'sigma' (keyword for the symbol 'σ').
-
-TODO: Skriv eller hänvisa till en lista på alla nyckelord?
 
 ### 3.3. Other functionality
 In addition to the writing and formatting functionality mentioned above, Mæthitor also supports the following functionality:
