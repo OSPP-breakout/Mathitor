@@ -48,7 +48,7 @@
 }
 .mq-editable-field,
 .mq-math-mode .mq-editable-field {
-  border: 1px solid gray;
+  border: 1px solid white;
 }
 .mq-editable-field.mq-focused,
 .mq-math-mode .mq-editable-field.mq-focused {
