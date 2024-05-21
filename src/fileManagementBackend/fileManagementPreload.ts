@@ -101,8 +101,7 @@ export const API = {
     saveUserDefinedSuggestion: (stringifiedJSON: string) => ipcRenderer.send("save: user defined suggestions", stringifiedJSON),
     
     // -------------------------- Shortcut functions -----------------------------
-    insertMathField: () => ipcRenderer.on("Shortcut: insert math field", createMathField),
-    
+    ShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: insert math field", callback),
 
     /**
      * Gets the PID of the calling renderer process.

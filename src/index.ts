@@ -6,12 +6,6 @@ import { createMathField } from './renderer/mathMode/mathMode';
 
 // TODO: Move file management code to file_management_backend.ts
 
-// TODO: Add documentation
-function loadBuiltInSuggestions() {
-    console.log("Hey! I didn't load anything. GET PRANKED!");
-    return "HI";
-}
-
 // ------------ Create new renderer process ------------
 
 /**
@@ -41,12 +35,13 @@ const createWindow = () => {
 // window when the app is ready.
 app.whenReady().then(() => {
     const window = createWindow();
-    const CTRLM = () => { window.webContents.send("Shortcut: insert math field")};
+    const insertMathField = () => {window.webContents.send("Shortcut: insert math field")};
 
     ipcMain.handle("load: user defined suggestions", Config.loadUserDefinedSuggestions);
     ipcMain.handle("load: built-in suggestions", Config.loadBuiltInSuggestions);
     ipcMain.on("save: user defined suggestions", Config.saveUserDefinedSuggestion);
-    globalShortcut.register("CommandOrControl+m", CTRLM);
+
+    globalShortcut.register("CommandOrControl+M", insertMathField);
 });
 
 
