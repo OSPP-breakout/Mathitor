@@ -36,12 +36,18 @@ const createWindow = () => {
 app.whenReady().then(() => {
     const window = createWindow();
     const insertMathField = () => {window.webContents.send("Shortcut: insert math field")};
+    const makeBold = () => {window.webContents.send("Shortcut: bold")};
+    const makeItalic = () => {window.webContents.send("Shortcut: italic")};
+    const makeUnderlined = () => {window.webContents.send("Shortcut: underline")};
 
     ipcMain.handle("load: user defined suggestions", Config.loadUserDefinedSuggestions);
     ipcMain.handle("load: built-in suggestions", Config.loadBuiltInSuggestions);
     ipcMain.on("save: user defined suggestions", Config.saveUserDefinedSuggestion);
-
+    
     globalShortcut.register("CommandOrControl+M", insertMathField);
+    globalShortcut.register("CommandOrControl+B", makeBold);
+    globalShortcut.register("CommandOrControl+I", makeItalic);
+    globalShortcut.register("CommandOrControl+U", makeUnderlined);
 });
 
 

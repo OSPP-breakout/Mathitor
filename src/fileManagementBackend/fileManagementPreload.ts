@@ -101,7 +101,10 @@ export const API = {
     saveUserDefinedSuggestion: (stringifiedJSON: string) => ipcRenderer.send("save: user defined suggestions", stringifiedJSON),
     
     // -------------------------- Shortcut functions -----------------------------
-    ShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: insert math field", callback),
+    mathFieldShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: insert math field", callback),
+    boldShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: bold", callback),
+    italicShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: italic", callback),
+    underlineShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: underline", callback),
 
     /**
      * Gets the PID of the calling renderer process.
