@@ -1,15 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, globalShortcut } from 'electron';
 import * as Config from "./fileManagementBackend/configLoader";
+import { createMathField } from './renderer/mathMode/mathMode';
 
 // TODO: Move file management code to file_management_backend.ts
-
-// TODO: Add documentation
-function loadBuiltInSuggestions() {
-    console.log("Hey! I didn't load anything. GET PRANKED!");
-    return "HI";
-}
 
 // ------------ Create new renderer process ------------
 
@@ -39,11 +34,14 @@ const createWindow = () => {
 // Creates the first renderer process by creating a new Mathitor
 // window when the app is ready.
 app.whenReady().then(() => {
-    createWindow();
+    const window = createWindow();
+    const insertMathField = () => {window.webContents.send("Shortcut: insert math field")};
 
     ipcMain.handle("load: user defined suggestions", Config.loadUserDefinedSuggestions);
     ipcMain.handle("load: built-in suggestions", Config.loadBuiltInSuggestions);
     ipcMain.on("save: user defined suggestions", Config.saveUserDefinedSuggestion);
+
+    globalShortcut.register("CommandOrControl+M", insertMathField);
 });
 
 

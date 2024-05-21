@@ -1,4 +1,4 @@
-import { loadBuiltInSuggestions, loadUserDefinedSuggestions, saveUserDefinedSuggestion } from "./configLoader";
+import { createMathField } from "../renderer/mathMode/mathMode";
 
 const { contextBridge, ipcRenderer } = require('electron')
 
@@ -96,10 +96,12 @@ export const API = {
 
     // -------------------------- Miscellaneous functions -----------------------------
 
-    // TODO: Add documentation
     loadUserDefinedSuggestions: (): Promise<string> => ipcRenderer.invoke("load: user defined suggestions"),
     loadBuiltInSuggestions: (): Promise<string> => ipcRenderer.invoke("load: built-in suggestions"),
     saveUserDefinedSuggestion: (stringifiedJSON: string) => ipcRenderer.send("save: user defined suggestions", stringifiedJSON),
+    
+    // -------------------------- Shortcut functions -----------------------------
+    ShortCut: (callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on("Shortcut: insert math field", callback),
 
     /**
      * Gets the PID of the calling renderer process.

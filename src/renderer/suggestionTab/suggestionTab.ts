@@ -323,6 +323,7 @@ export class suggestionTab {
     private suggestionKeyDown(e: any) {
         switch(e.key) {
             case "Escape": 
+                this.close();
                 this.blur();
                 break;
             case "Enter": 
