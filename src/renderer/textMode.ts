@@ -36,7 +36,6 @@ export function font_size(e: any): void {
 
 export function bold(): void {
     document.execCommand('bold');
-	console.log("HI!");
 	correctAllMathFields();
 }
 
